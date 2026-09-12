@@ -54,7 +54,8 @@ const path=require('node:path');
    'gpsdata','nmea','tracker start','tracker stop','gpspoi','info','reboot','ls /','brightness','settings'
   ];
   for(const label of expectedLabels)assert(await page.locator('[data-label="'+label.replaceAll('"','\\"')+'"]').count()>=1,'Missing menu entry: '+label);
-  assert.equal(await page.locator('[data-label="httpscan"]').count(),2);
+assert.equal(await page.locator('[data-label="httpscan"]').count(),1);
+assert.equal(await page.locator('[data-label="httpsscan"]').count(),1);
 
   await page.fill('#menuFilter','tracker');
   assert.equal(await page.locator('.cmd').count(),2);
