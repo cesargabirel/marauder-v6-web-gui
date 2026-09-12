@@ -17,25 +17,87 @@ Interfaz web autónoma en español para controlar un **ESP32 Marauder v6.1**, co
 
 El mapeo se verificó contra el **tag oficial v1.16.0**, commit `fe2160f0aa53ad8e6c5860f8dddd6e7bbaa3ba0b`, en [CommandLine.h](https://github.com/justcallmekoko/ESP32Marauder/blob/fe2160f0aa53ad8e6c5860f8dddd6e7bbaa3ba0b/esp32_marauder/CommandLine.h) y [CommandLine.cpp](https://github.com/justcallmekoko/ESP32Marauder/blob/fe2160f0aa53ad8e6c5860f8dddd6e7bbaa3ba0b/esp32_marauder/CommandLine.cpp).
 
-**`scanap` no existe en ese código.** Se utiliza `scanall`, que escanea puntos de acceso y estaciones. La terminal permite introducir comandos propios de un fork, pero no se presupone que sean compatibles con el firmware oficial.
+El menú jerárquico reproduce las categorías solicitadas del dispositivo: **WiFi → Sniffers / Scanners / Attacks / General**, **Bluetooth → Sniffers / Attacks**, **GPS** y **Sistema / SD**. Usa elementos HTML nativos `details` / `summary` y CSS, sin scripts de apertura. Tab mueve el foco; Enter o Espacio abre/cierra un nivel. El menú tiene desplazamiento independiente y la terminal central conserva su funcionamiento.
 
-| Categoría | Botón | Comando exacto |
-| --- | --- | --- |
-| WiFi | Escanear APs y estaciones | `scanall` |
-| WiFi | Listar puntos de acceso | `list -a` |
-| WiFi | Listar estaciones | `list -c` |
-| WiFi | Consultar canal | `channel` |
-| Bluetooth | Escanear Bluetooth | `sniffbt` |
-| Bluetooth | Listar dispositivos | `list -b` |
-| GPS | Datos GPS | `gpsdata` |
-| GPS | Flujo NMEA | `nmea` |
-| Sistema | Información | `info` |
-| Sistema | Ayuda | `help` |
-| Sistema | Reiniciar | `reboot` |
-| SD | Listar raíz | `ls /` |
-| Global | Detener | `stopscan` |
+Las etiquetas físicas no siempre coinciden con comandos CLI. Cada botón muestra la sintaxis realmente enviada. **No se envían nombres inventados**: por ejemplo, `pwnagotchi` usa `sniffpwn`. `scanap` no existe literalmente: su botón usa `sniffbeacon` para observar AP mediante beacons. `scanall` observa AP y estaciones. Cinco entradas quedan deshabilitadas con explicación: `scansta`, `shutdown`, `startap`, `stopap` y `sniffraw` dentro de Bluetooth. Por eso la GUI no sustituye funciones físicas que el firmware no expone por Serial.
 
-GPS y Bluetooth dependen de las capacidades compiladas y del hardware presente. `gpsdata` y `nmea` inician flujos; usa `stopscan` antes de cambiar de operación. `reboot` pide confirmación en la interfaz.
+Los botones que necesitan parámetros abren un editor en la barra lateral con validación y vista previa: portscan, beaconspam, karma, clearlist, join, setmac, selección de objetivos, findmy, blespam, spoofairtag y brightness. No envían plantillas incompletas. Para acciones basadas en índices, consulta primero la lista del dispositivo. Los índices se validan como enteros no negativos; su existencia y los requisitos de la operación los determina el firmware.
+
+**Detener** permanece fijo en el borde inferior incluso al desplazar el menú o la página. Envía `stopscan` y cancela primero la recogida local del listado SD, si está activa. Solo se habilita con conexión. Es una solicitud al firmware: no garantiza interrumpir operaciones bloqueantes ni reemplaza el reinicio o apagado físico. Los comandos GPS/Bluetooth dependen del hardware y de las opciones de compilación; detén una operación antes de iniciar otra.
+
+| Categoría | Subcategoría | Etiqueta | CLI enviada / plantilla | Nota |
+| --- | --- | --- | --- | --- |
+| WiFi | Sniffers | `sniffbeacon` | `sniffbeacon` | — |
+| WiFi | Sniffers | `sniffprobe` | `sniffprobe` | — |
+| WiFi | Sniffers | `sniffdeauth` | `sniffdeauth` | — |
+| WiFi | Sniffers | `sniffpmkid` | `sniffpmkid` | Modo predeterminado del firmware; opciones adicionales por CLI. |
+| WiFi | Sniffers | `sniffraw` | `sniffraw` | — |
+| WiFi | Sniffers | `pwnagotchi` | `sniffpwn` | — |
+| WiFi | Scanners | `scanall` | `scanall` | — |
+| WiFi | Scanners | `scanap` | `sniffbeacon` | Equivalente de observación de AP por beacons; scanap no existe en esta versión. |
+| WiFi | Scanners | `scansta` | No disponible | Sin escaneo CLI exclusivo de estaciones. Usa scanall y después list -c. |
+| WiFi | Scanners | `pingscan` | `pingscan` | — |
+| WiFi | Scanners | `arpscan` | `arpscan` | — |
+| WiFi | Scanners | `portscan` | `portscan -a -t <índice>` | Índice de IP obtenido con list -i; requiere conexión a la red. |
+| WiFi | Scanners | `sshescan` | `portscan -s ssh` | — |
+| WiFi | Scanners | `dnsscan` | `portscan -s dns` | — |
+| WiFi | Scanners | `httpsscan` | `portscan -s https` | — |
+| WiFi | Scanners | `Listar APs` | `list -a` | — |
+| WiFi | Scanners | `Listar estaciones` | `list -c` | — |
+| WiFi | Scanners | `Listar IPs` | `list -i` | — |
+| WiFi | Attacks | `deauth` | `attack -t deauth` | Requiere objetivos seleccionados con select. |
+| WiFi | Attacks | `beaconspam` | `attack -t beacon <modo>` | — |
+| WiFi | Attacks | `rickroll` | `attack -t rickroll` | — |
+| WiFi | Attacks | `probespam` | `attack -t probe` | — |
+| WiFi | Attacks | `karma` | `karma -p <índice>` | Índice de SSID de probe; consulta list -p. |
+| WiFi | Attacks | `badmsg` | `attack -t badmsg` | — |
+| WiFi | Attacks | `saecommit` | `attack -t sae` | — |
+| WiFi | General | `clearlist` | `clearlist <lista>` | — |
+| WiFi | General | `join` | `join -a <índice> -p <contraseña>` | El firmware imprime la contraseña en su respuesta: estará en el log de sesión. |
+| WiFi | General | `Conectar red guardada` | `join -s` | — |
+| WiFi | General | `setmac` | `randapmac / randstamac / clone…` | No existe setmac literal ni asignación CLI de MAC arbitraria en esta versión. |
+| WiFi | General | `shutdown` | No disponible | La función física de apagar WiFi no está expuesta por la CLI. |
+| WiFi | General | `startap` | No disponible | No existe este comando CLI. No se sustituye por un portal de otra función. |
+| WiFi | General | `stopap` | No disponible | No existe este comando CLI. stopscan detiene modos de escaneo compatibles. |
+| WiFi | General | `Seleccionar objetivos` | `select <lista> <índice>` | El firmware alterna la selección del índice. Comprueba el resultado con list. |
+| WiFi | General | `Listar SSID de probes` | `list -p` | — |
+| WiFi | General | `Canal actual` | `channel` | — |
+| Bluetooth | Sniffers | `sniffbt` | `sniffbt` | — |
+| Bluetooth | Sniffers | `sniffraw` | No disponible | sniffraw pertenece a WiFi; no hay equivalente Bluetooth raw en esta CLI. |
+| Bluetooth | Sniffers | `findmy` | `findmy -t <índice>` | Hace sonar el AirTag seleccionado (list -t); depende de HAS_NIMBLE_2 y del dispositivo, no es un escaneo. |
+| Bluetooth | Sniffers | `flock` | `sniffbt -t flock` | — |
+| Bluetooth | Sniffers | `metadetect` | `sniffbt -t meta` | — |
+| Bluetooth | Sniffers | `skimmer` | `sniffskim` | — |
+| Bluetooth | Sniffers | `Detectar AirTags` | `sniffbt -t airtag` | — |
+| Bluetooth | Sniffers | `Listar AirTags` | `list -t` | — |
+| Bluetooth | Sniffers | `Listar Bluetooth` | `list -b` | — |
+| Bluetooth | Attacks | `blespam` | `blespam -t <tipo>` | — |
+| Bluetooth | Attacks | `spoofairtag` | `spoofat -t <índice>` | Índice de AirTag de list -t. |
+| Bluetooth | Attacks | `sourapple` | `blespam -t sourapple` | — |
+| Bluetooth | Attacks | `applejuice` | `blespam -t applejuice` | — |
+| Bluetooth | Attacks | `swiftpair` | `blespam -t windows` | — |
+| Bluetooth | Attacks | `samsungspam` | `blespam -t samsung` | — |
+| Bluetooth | Attacks | `googlespam` | `blespam -t google` | — |
+| Bluetooth | Attacks | `flipperspam` | `blespam -t flipper` | — |
+| GPS | — | `gpsdata` | `gpsdata` | — |
+| GPS | — | `gps sat` | `gps -g sat` | — |
+| GPS | — | `tracker start` | `gpstracker -c start` | — |
+| GPS | — | `tracker stop` | `gpstracker -c stop` | — |
+| GPS | — | `wardrive` | `wardrive` | — |
+| GPS | — | `NMEA` | `nmea` | — |
+| Sistema / SD | — | `info` | `info` | — |
+| Sistema / SD | — | `reboot` | `reboot` | — |
+| Sistema / SD | — | `ls /` | `ls /` | — |
+| Sistema / SD | — | `backup` | `backupspiffs` | Copia SPIFFS a /spiffs en la SD; no es una imagen completa del firmware. |
+| Sistema / SD | — | `restore` | `restorespiffs` | Restaura SPIFFS desde /spiffs en SD y puede sobrescribir su contenido. |
+| Sistema / SD | — | `brightness` | `brightness -s <0–9>` | — |
+| Sistema / SD | — | `Consultar brillo` | `brightness` | — |
+| Sistema / SD | — | `Estado de backup` | `backupstatus` | — |
+| Sistema / SD | — | `Ayuda` | `help` | — |
+
+`backup` y `restore` operan sobre **SPIFFS**, no sobre una imagen completa del equipo. La restauración puede sobrescribir datos. `findmy` hace sonar un AirTag seleccionado cuando la compilación lo admite; no es un sniffer. `setmac` ofrece aleatorización o clonación desde listas, no una MAC arbitraria.
+
+**Credenciales de join:** el firmware imprime la contraseña en su respuesta Serial, que queda en la terminal y en el log exportable. El editor oculta el campo y la vista previa, pero no filtra la respuesta del dispositivo. Revisa los logs antes de compartirlos.
 
 El perfil solicitado indica ESP-IDF `v5.5.1-710-g8410210c9a`, WSL Bypass habilitado, SD conectada de 3839 MB y monitor de batería no soportado. Son datos proporcionados para la unidad, **no mediciones realizadas por esta aplicación**. Las MAC del propietario no se incluyen en el repositorio. Ejecuta `info` y `help` para verificar tu compilación real. El nombre de versión por sí solo no identifica cambios de un fork.
 
@@ -71,7 +133,7 @@ El comando `ls <directorio>` de v1.16.0 devuelve líneas `nombre<TAB>tamaño`. [
 2. Introduce `/` o una ruta absoluta sin espacios/comillas y pulsa **Listar directorio**.
 3. Se recogen respuestas fragmentadas del puerto y se reconocen líneas con nombre y tamaño.
 4. Pulsa **Finalizar lectura** cuando termine. A los 30 segundos se cierra la ventana de recepción con un aviso de posible resultado incompleto.
-5. Usa **Guardar listado** para exportar el texto recibido. La consulta bloquea temporalmente otros botones de envío para reducir respuestas mezcladas; puedes finalizarla en cualquier momento.
+5. Usa **Guardar listado** para exportar el texto recibido. La consulta bloquea temporalmente otros botones de envío para reducir respuestas mezcladas; Detener permanece habilitado y cierra la consulta antes de enviar stopscan.
 
 Una SD vacía, ausente o una ruta inválida pueden no producir salida. La aplicación no puede distinguirlas de forma fiable solo con `ls`. El listado no indica éxito ni integridad. Se muestran hasta 2000 entradas y se retienen hasta 2 MiB de texto.
 
@@ -129,7 +191,7 @@ npx playwright install chromium
 node tests/browser.cjs
 ```
 
-La prueba levanta un servidor temporal en localhost y simula `navigator.serial`: apertura a 115200, comandos y LF/CRLF, UTF-8 fragmentado, texto no confiable, listado SD fragmentado, rechazo de caracteres de control, copia binaria, desconexión/reconexión y adaptación móvil/tablet. Regenera las capturas de `docs/`.
+La prueba levanta un servidor temporal en localhost y simula `navigator.serial`: apertura a 115200, comandos y LF/CRLF, UTF-8 fragmentado, texto no confiable, listado SD fragmentado, rechazo de caracteres de control, copia binaria, desconexión/reconexión y adaptación móvil/tablet. También verifica navegación por teclado del acordeón, equivalencias CLI, opciones no disponibles, validación de parámetros y visibilidad de Detener durante la consulta SD y al desplazar una pantalla móvil. Regenera las capturas de `docs/`.
 
 Para usar Edge instalado, establece `BROWSER_CHANNEL=msedge` en el entorno. `PLAYWRIGHT_MODULE` permite indicar una instalación externa de Playwright.
 
