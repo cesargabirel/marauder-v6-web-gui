@@ -1,430 +1,94 @@
-<!DOCTYPE html>
-<html lang="es" data-bs-theme="dark">
+<!doctype html>
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Marauder v6.1 - Panel de Control</title>
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <style>
-        body {
-            height: 100vh;
-            overflow: hidden;
-            background-color: #0b0e14; /* Fondo súper oscuro tipo hacker */
-        }
-        .sidebar {
-            height: 100vh;
-            overflow-y: auto;
-            border-right: 1px solid #30363d;
-            background-color: #0d1117;
-        }
-        .main-panel {
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            background-color: #0b0e14;
-        }
-        .terminal-window {
-            flex-grow: 1;
-            background-color: #000000;
-            color: #4af626; /* Verde terminal clásico */
-            font-family: 'Consolas', 'Courier New', monospace;
-            font-size: 0.9rem;
-            padding: 15px;
-            overflow-y: auto;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            border-radius: 8px;
-            border: 1px solid #30363d;
-        }
-        /* Estilo para los botones de comando para que se vean compactos */
-        .cmd-btn {
-            font-size: 0.75rem;
-            text-align: left;
-            padding: 4px 8px;
-        }
-        .accordion-button {
-            padding: 10px 15px;
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-        .accordion-body {
-            padding: 10px;
-        }
-        .subcategory-title {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            color: #8b949e;
-            margin-top: 10px;
-            margin-bottom: 5px;
-            font-weight: bold;
-            border-bottom: 1px solid #21262d;
-            padding-bottom: 2px;
-        }
-        /* Scrollbar personalizada */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #0d1117; }
-        ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #8b949e; }
-    </style>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Marauder · USB control</title>
+<style>
+:root{--bg:#0a0e14;--panel:#111720;--line:#24303d;--muted:#93a1b5;--text:#e4ebf4;--mint:#68efb8;--red:#ff8998;--blue:#8db9ff;font-family:Inter,Segoe UI,system-ui,sans-serif;color:var(--text);background:var(--bg)}*{box-sizing:border-box}body{margin:0}button,input,select{font:inherit}button{cursor:pointer;color:var(--text);background:#1b2532;border:1px solid #344255;border-radius:8px;padding:10px 13px;min-height:42px}button:hover:enabled{border-color:var(--mint);background:#22362f}button:disabled{opacity:.4;cursor:not-allowed}button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid var(--mint);outline-offset:3px}header{min-height:92px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:20px 28px;gap:20px}.brand{display:flex;align-items:center;gap:13px}.logo{background:var(--mint);color:#0a1813;font-size:25px;font-weight:900;padding:8px 14px;clip-path:polygon(15% 0,100% 0,100% 85%,85% 100%,0 100%,0 15%)}h1{font-size:20px;letter-spacing:3px;margin:0}small,.muted{color:var(--muted)}.eyebrow{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}.connection{display:flex;align-items:center;gap:16px}.status{font-size:12px;display:flex;gap:8px;align-items:center}.dot{width:8px;height:8px;border-radius:50%;background:#8793a5}.online .dot{background:var(--mint);box-shadow:0 0 14px #68efb855}.primary{background:var(--mint);color:#092417;border-color:var(--mint);font-weight:700}.primary:hover:enabled{background:#98ffd1;color:#092417}.layout{display:grid;grid-template-columns:258px minmax(0,1fr);min-height:calc(100vh - 92px)}aside{padding:24px 20px;border-right:1px solid var(--line);background:#0e141d}h2{font-size:14px;margin:0}h3{font-size:11px;letter-spacing:1.8px;color:var(--muted);text-transform:uppercase;margin:25px 0 10px}.cmd{display:flex;width:100%;align-items:center;justify-content:space-between;margin:6px 0;background:transparent;border-color:transparent;text-align:left;font-size:13px}.cmd code{font-size:10px;color:var(--muted)}.stop{border-color:#683843;color:var(--red);width:100%;margin-top:18px}main{padding:25px 28px;min-width:0}.intro{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:22px}.intro h2{font-size:25px;font-weight:600;margin:6px 0}.badge{border:1px solid #3a4c5a;border-radius:5px;padding:6px 9px;font:11px monospace;color:var(--mint)}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}.stat{padding:14px 18px;background:var(--panel);border:1px solid var(--line);border-radius:10px}.stat strong{display:block;margin-top:8px;font-size:15px;font-weight:500}.panel{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--panel);margin-bottom:18px}.bar{display:flex;justify-content:space-between;align-items:center;padding:13px 17px;border-bottom:1px solid var(--line);gap:12px}.tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.tools button{font-size:11px;padding:6px 10px;min-height:32px}.terminal{height:340px;overflow:auto;background:#080d12;padding:18px;margin:0;font:12px/1.8 Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere;color:#c6d6e5}.terminal .sys{color:var(--muted)}.terminal .tx{color:var(--mint)}.terminal .error{color:var(--red)}form{display:flex;gap:10px;padding:12px 16px;align-items:center;border-top:1px solid var(--line)}.prompt{color:var(--mint);font-family:monospace}input,select{background:#0b111a;color:var(--text);border:1px solid var(--line);border-radius:6px;padding:10px;min-width:0}#command{flex:1;border:0;background:transparent}select{font-size:11px}label{font-size:12px;color:var(--muted)}.sd-body{padding:17px}.sd-top{display:flex;justify-content:space-between;gap:16px;align-items:center}.sd-top p{font-size:12px;line-height:1.65;max-width:670px;margin:7px 0;color:var(--muted)}.path{display:flex;gap:8px;margin:16px 0}.path input{flex:1}table{width:100%;border-collapse:collapse;font-size:12px}th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);overflow-wrap:anywhere}th{font-size:10px;color:var(--muted);font-weight:500;text-transform:uppercase}.notice{font-size:12px;padding:12px 16px;border:1px solid #65502d;background:#221e15;border-radius:8px;color:#e6c68d;margin-bottom:18px}.foot{font-size:11px;color:var(--muted);display:flex;justify-content:space-between;gap:12px}.local{margin-top:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}.local input{max-width:100%;font-size:12px}#message{font-size:12px;color:var(--red);min-height:18px;margin:8px 0}.check{display:flex;gap:6px;align-items:center}a{color:var(--mint)}@media(min-width:1500px){main{max-width:1400px;width:100%;margin:auto}.terminal{height:450px}}@media(max-width:900px){header{padding:16px}.layout{grid-template-columns:210px minmax(0,1fr)}aside{padding:16px 10px}main{padding:20px 16px}.cmd{display:block}.cmd code{display:block;margin-top:5px}.sd-top{display:block}.status{font-size:11px}.tools{gap:4px}.intro h2{font-size:21px}}@media(max-width:620px){header,.connection{flex-wrap:wrap}.layout{display:flex;flex-direction:column}aside{border-right:0;border-bottom:1px solid var(--line)}#groups{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}h3{margin-top:16px}.cmd{display:flex}.cmd code{font-size:9px}.intro{align-items:flex-start}.stats{gap:6px}.stat{padding:12px 9px}.stat strong{font-size:12px}.bar{flex-wrap:wrap}.terminal{height:310px}form{flex-wrap:wrap}#command{min-width:60%}.foot{flex-direction:column}.path{flex-wrap:wrap}}
+
+/* Native details/summary: hierarchy works with mouse, Enter and Space, without toggle scripts. */
+aside{position:sticky;top:0;align-self:start;max-height:100vh;overflow:auto;padding-bottom:90px}
+#groups{display:block;margin-top:18px}details{border-bottom:1px solid var(--line)}summary{cursor:pointer;padding:14px 8px;font-size:14px;font-weight:600;min-height:44px}summary::marker{color:var(--mint)}summary:focus-visible{outline:2px solid var(--mint);outline-offset:-2px}details[open]>summary{color:var(--mint)}.submenu{margin-left:10px;border-bottom:0;border-left:1px solid var(--line);padding-left:6px}.submenu summary{font-size:12px;color:var(--muted)}.cmd{display:block;white-space:normal;overflow-wrap:anywhere;margin:3px 0;padding:9px 8px}.cmd code{display:block;margin-top:4px;line-height:1.4}.cmd small{display:block;font-size:10px;line-height:1.4;margin-top:4px}.cmd:disabled{opacity:.65}.cmd[data-unavailable]{border-left:2px solid #65502d}.stop{position:fixed;bottom:16px;right:24px;z-index:20;width:auto;margin:0;background:#38212a;box-shadow:0 4px 24px #0009;min-height:48px}.stop:disabled{opacity:1;color:#aa8390}body{padding-bottom:80px}.action-editor{margin:14px 0;padding:12px;border:1px solid var(--line);border-radius:8px;background:var(--panel)}.action-editor label{display:block;margin:10px 0}.action-editor input,.action-editor select{display:block;width:100%;margin-top:5px}.action-editor p{font-size:11px;color:var(--muted);line-height:1.5}.action-editor code{display:block;overflow-wrap:anywhere;font-size:11px;color:var(--mint);margin:12px 0}.action-editor button{width:100%;margin-top:6px}.action-error{color:var(--red)!important}#actionTitle{font-size:14px;overflow-wrap:anywhere}
+@media(max-width:620px){aside{position:static;max-height:340px;padding-bottom:16px}#groups{display:block}.stop{bottom:10px;right:10px;left:10px;width:calc(100% - 20px)}}
+</style>
 </head>
 <body>
+<header><div class="brand"><div class="logo" aria-hidden="true">M</div><div><h1>MARAUDER</h1><small>USB CONTROL INTERFACE</small></div></div><div class="connection"><span id="status" class="status" role="status"><i class="dot"></i><span id="stateText">Desconectado</span></span><button id="connect" class="primary">Conectar dispositivo</button></div></header>
+<div class="layout"><aside><span class="eyebrow">Centro de comandos</span><nav id="groups" aria-label="Menú del Marauder"></nav><section id="actionEditor" class="action-editor" hidden aria-labelledby="actionTitle"><h2 id="actionTitle"></h2><p id="actionHelp"></p><div id="actionFields"></div><code id="actionPreview"></code><p id="actionError" class="action-error" role="alert"></p><button id="runAction" class="primary">Enviar comando</button><button id="cancelAction">Cerrar configuración</button></section><button class="stop" data-command="stopscan">■ Detener · stopscan</button><h3>Perfil de destino</h3><small>Marauder v6.1<br>Firmware v1.16.0<br><br>Comandos verificados contra el código oficial. Consulta <b>info</b> para comprobar tu unidad.</small></aside>
+<main><div class="intro"><div><span class="eyebrow">Consola de operaciones / USB</span><h2>Tu dispositivo. En tiempo real.</h2><small>Explora, observa y registra desde una sola terminal.</small></div><span class="badge">v1.16.0</span></div>
+<div id="compat" class="notice" hidden></div><div class="stats"><div class="stat"><span class="eyebrow">Transporte</span><strong>USB Serial · 115200</strong></div><div class="stat"><span class="eyebrow">Datos recibidos</span><strong id="rx">0 B</strong></div><div class="stat"><span class="eyebrow">Sesión</span><strong id="session">Sin conexión</strong></div></div>
+<section class="panel" aria-label="Terminal CLI"><div class="bar"><h2>⌘ &nbsp; Terminal CLI</h2><div class="tools"><label class="check"><input id="autoscroll" type="checkbox" checked>Autoscroll</label><button id="export">↓ Exportar log</button><button id="clear">Limpiar</button></div></div><pre id="terminal" class="terminal" tabindex="0" aria-label="Salida del puerto serie"></pre><form id="cli"><span class="prompt">❯</span><input id="command" aria-label="Comando CLI" placeholder="Escribe un comando… (help)" autocomplete="off" spellcheck="false" maxlength="512"><select id="eol" aria-label="Fin de línea"><option value="lf">LF</option><option value="crlf">CRLF</option></select><button id="send" class="primary" type="submit">Enviar ↵</button></form></section>
+<section class="panel"><div class="bar"><h2>▤ &nbsp; Archivos y tarjeta SD</h2><span class="eyebrow">PCAP / LOGS</span></div><div class="sd-body"><div class="sd-top"><div><b>Consulta la SD por USB</b><p><code>ls</code> devuelve nombres y tamaños. El firmware oficial v1.16.0 no implementa transferencia de archivos SD por Serial. Para copiar PCAP/logs, conecta la SD a un lector de tu PC.</p></div><button id="saveListing">↓ Guardar listado</button></div><div class="path"><input id="path" value="/" aria-label="Directorio SD" placeholder="/directorio"><button id="listSD">Listar directorio</button><button id="finishList" disabled>Finalizar lectura</button></div><p id="listingStatus" class="muted" style="font-size:12px" role="status">Sin consulta. Los tamaños provienen del dispositivo.</p><table><thead><tr><th>Entrada SD</th><th>Tamaño (bytes)</th><th>Acceso</th></tr></thead><tbody id="files"><tr><td colspan="3" class="muted">Conecta el Marauder para consultar la SD.</td></tr></tbody></table><div class="local"><label for="localFiles">Copiar desde lector SD:</label><input id="localFiles" type="file" multiple accept=".pcap,.pcapng,.log,.txt,.csv"><span class="muted" style="font-size:11px">Archivos locales; no se suben a Internet.</span></div><div id="localList"></div></div></section>
+<div id="message" role="alert"></div><footer class="foot"><span>Uso exclusivo en dispositivos y redes propios o con autorización.</span><span>Sin servidores · Sin telemetría · <a href="README.md">Documentación ↗</a></span></footer></main></div>
+<script>
+'use strict';
+const $=id=>document.getElementById(id);
+// Source: upstream v1.16.0, commit fe2160f0aa53ad8e6c5860f8dddd6e7bbaa3ba0b.
+// scanap is absent in this version. scanall scans APs AND stations.
+const entry=(label,command=label,note='')=>({label,command,note});
+const unavailable=(label,note)=>({label,command:'',note,unavailable:true});
+const choice=(label,options)=>({label,options});
+const indexField=(label='Índice (consulta la lista del dispositivo)')=>({label,type:'number',min:0,max:65535});
+const configured=(label,command,fields,build,note='')=>({label,command,fields,build,note});
+const targetAction=(label,command,flag,note)=>configured(label,command+' '+flag+' <índice>',[indexField()],v=>command+' '+flag+' '+v[0],note);
+const MENU={
+ WiFi:{
+  Sniffers:[entry('sniffbeacon'),entry('sniffprobe'),entry('sniffdeauth'),entry('sniffpmkid','sniffpmkid','Modo predeterminado del firmware; opciones adicionales por CLI.'),entry('sniffraw'),entry('pwnagotchi','sniffpwn')],
+  Scanners:[entry('scanall'),entry('scanap','sniffbeacon','Equivalente de observación de AP por beacons; scanap no existe en esta versión.'),unavailable('scansta','Sin escaneo CLI exclusivo de estaciones. Usa scanall y después list -c.'),entry('pingscan'),entry('arpscan'),targetAction('portscan','portscan -a','-t','Índice de IP obtenido con list -i; requiere conexión a la red.'),entry('sshescan','portscan -s ssh'),entry('dnsscan','portscan -s dns'),entry('httpsscan','portscan -s https'),entry('Listar APs','list -a'),entry('Listar estaciones','list -c'),entry('Listar IPs','list -i')],
+  Attacks:[entry('deauth','attack -t deauth','Requiere objetivos seleccionados con select.'),configured('beaconspam','attack -t beacon <modo>',[choice('Origen de beacons',[['-r','Aleatorios'],['-l','Lista SSID'],['-a','Lista AP']])],v=>'attack -t beacon '+v[0]),entry('rickroll','attack -t rickroll'),entry('probespam','attack -t probe'),targetAction('karma','karma','-p','Índice de SSID de probe; consulta list -p.'),entry('badmsg','attack -t badmsg'),entry('saecommit','attack -t sae')],
+  General:[configured('clearlist','clearlist <lista>',[choice('Lista',[['-a','APs'],['-c','Estaciones'],['-s','SSID']])],v=>'clearlist '+v[0]),configured('join','join -a <índice> -p <contraseña>',[indexField('Índice AP (list -a)'),{label:'Contraseña',type:'password'}],v=>'join -a '+v[0]+' -p '+quoteArgument(v[1]),'El firmware imprime la contraseña en su respuesta: estará en el log de sesión.'),entry('Conectar red guardada','join -s'),configured('setmac','randapmac / randstamac / clone…',[choice('Operación',[['randapmac','MAC AP aleatoria'],['randstamac','MAC estación aleatoria'],['cloneapmac','Clonar AP de lista'],['clonestamac','Clonar estación de lista']]),{...indexField('Índice para clonar (ignorado al aleatorizar)'),optional:true}],v=>{if(v[0].startsWith('clone')&&!/^\d+$/.test(v[1]))throw new Error('Introduce el índice que quieres clonar.');return v[0]+(v[0]==='cloneapmac'?' -a '+v[1]:v[0]==='clonestamac'?' -s '+v[1]:'')},'No existe setmac literal ni asignación CLI de MAC arbitraria en esta versión.'),unavailable('shutdown','La función física de apagar WiFi no está expuesta por la CLI.'),unavailable('startap','No existe este comando CLI. No se sustituye por un portal de otra función.'),unavailable('stopap','No existe este comando CLI. stopscan detiene modos de escaneo compatibles.'),configured('Seleccionar objetivos','select <lista> <índice>',[choice('Lista',[['-a','AP'],['-c','Estación'],['-s','SSID']]),indexField()],v=>'select '+v[0]+' '+v[1],'El firmware alterna la selección del índice. Comprueba el resultado con list.'),entry('Listar SSID de probes','list -p'),entry('Canal actual','channel')]
+ },
+ Bluetooth:{
+  Sniffers:[entry('sniffbt'),unavailable('sniffraw','sniffraw pertenece a WiFi; no hay equivalente Bluetooth raw en esta CLI.'),targetAction('findmy','findmy','-t','Hace sonar el AirTag seleccionado (list -t); depende de HAS_NIMBLE_2 y del dispositivo, no es un escaneo.'),entry('flock','sniffbt -t flock'),entry('metadetect','sniffbt -t meta'),entry('skimmer','sniffskim'),entry('Detectar AirTags','sniffbt -t airtag'),entry('Listar AirTags','list -t'),entry('Listar Bluetooth','list -b')],
+  Attacks:[configured('blespam','blespam -t <tipo>',[choice('Tipo',[['all','Todos'],['sourapple','SourApple'],['applejuice','AppleJuice'],['windows','Windows'],['samsung','Samsung'],['google','Google'],['flipper','Flipper']])],v=>'blespam -t '+v[0]),targetAction('spoofairtag','spoofat','-t','Índice de AirTag de list -t.'),entry('sourapple','blespam -t sourapple'),entry('applejuice','blespam -t applejuice'),entry('swiftpair','blespam -t windows'),entry('samsungspam','blespam -t samsung'),entry('googlespam','blespam -t google'),entry('flipperspam','blespam -t flipper')]
+ },
+ GPS:[entry('gpsdata'),entry('gps sat','gps -g sat'),entry('tracker start','gpstracker -c start'),entry('tracker stop','gpstracker -c stop'),entry('wardrive'),entry('NMEA','nmea')],
+ 'Sistema / SD':[entry('info'),entry('reboot'),entry('ls /'),entry('backup','backupspiffs','Copia SPIFFS a /spiffs en la SD; no es una imagen completa del firmware.'),entry('restore','restorespiffs','Restaura SPIFFS desde /spiffs en SD y puede sobrescribir su contenido.'),configured('brightness','brightness -s <0–9>',[{label:'Nivel de brillo (0–9)',type:'number',min:0,max:9}],v=>'brightness -s '+v[0]),entry('Consultar brillo','brightness'),entry('Estado de backup','backupstatus'),entry('Ayuda','help')]
+};
+const ACTIONS=new Map();
+function appendButtons(parent,items){for(const item of items){const b=document.createElement('button');b.className='cmd';b.dataset.command=item.command;b.dataset.label=item.label;const label=document.createElement('span'),code=document.createElement('code');label.textContent=item.label;code.textContent=item.unavailable?'No disponible en CLI v1.16.0':item.command;b.append(label,code);if(item.note){const note=document.createElement('small');note.textContent=item.note;b.append(note)}if(item.unavailable){b.dataset.unavailable='true';b.disabled=true}if(item.fields){const id=String(ACTIONS.size);ACTIONS.set(id,item);b.dataset.action=id}parent.append(b)}}
+for(const [group,content] of Object.entries(MENU)){const details=document.createElement('details'),summary=document.createElement('summary');details.name='marauder-sections';summary.textContent=group;details.append(summary);if(Array.isArray(content))appendButtons(details,content);else for(const [name,items] of Object.entries(content)){const sub=document.createElement('details'),title=document.createElement('summary');sub.className='submenu';title.textContent=name;sub.append(title);appendButtons(sub,items);details.append(sub)}$('groups').append(details)}
+function quoteArgument(value){if(!value.includes('"'))return '"'+value+'"';if(!value.includes("'"))return "'"+value+"'";throw new Error('El parser del firmware no admite ambos tipos de comillas en este argumento.');}
+let activeAction=null,actionTrigger=null;
+function buildAction(){const values=[...$('actionFields').querySelectorAll('input,select')].map(input=>{if(!input.checkValidity())throw new Error('Completa los parámetros con valores válidos.');return input.type==='number'&&input.value!==''?String(Number(input.value)):input.value});return activeAction.build(values)}
+function updatePreview(){try{$('actionPreview').textContent=activeAction.label==='join'?'join -a <índice> -p [contraseña oculta]':buildAction()}catch{$('actionPreview').textContent=activeAction.command}}
+function openAction(item,trigger){activeAction=item;actionTrigger=trigger;$('actionTitle').textContent=item.label;$('actionHelp').textContent=item.note||'Configura los parámetros y envía el comando.';$('actionError').textContent='';$('actionFields').replaceChildren();for(const field of item.fields){const label=document.createElement('label');label.textContent=field.label;const input=document.createElement(field.options?'select':'input');if(field.options){for(const [value,text] of field.options){const option=document.createElement('option');option.value=value;option.textContent=text;input.append(option)}}else{input.type=field.type;input.required=!field.optional;if(field.type==='number'){input.min=field.min;input.max=field.max;input.step=1}else{input.maxLength=128;input.autocomplete='off'}}input.oninput=updatePreview;label.append(input);$('actionFields').append(label)}$('actionEditor').hidden=false;updatePreview();$('actionFields').querySelector('input,select').focus();refresh()}
+$('cancelAction').onclick=()=>{$('actionEditor').hidden=true;$('actionFields').replaceChildren();activeAction=null;actionTrigger?.focus()};
+$('runAction').onclick=async()=>{try{if(!activeAction||state!=='connected'||listing)return;const command=buildAction();await send(command);$('actionError').textContent='';if(activeAction.label==='join')$('actionFields').querySelector('input[type=password]').value=''}catch(e){$('actionError').textContent=e.message}};
 
-    <div class="container-fluid p-0">
-        <div class="row g-0">
-            
-            <!-- ==================== BARRA LATERAL ==================== -->
-            <div class="col-md-4 col-lg-3 col-xl-2 sidebar">
-                
-                <!-- Cabecera / Estado -->
-                <div class="p-3 border-bottom border-secondary text-center">
-                    <h5 class="mb-1 text-info fw-bold"><i class="bi bi-cpu"></i> MARAUDER v6.1</h5>
-                    <div class="small text-muted mb-2">
-                        <span id="statusDot" class="badge bg-danger me-1">●</span>
-                        <span id="statusText">Desconectado</span>
-                    </div>
-                    <button class="btn btn-outline-info btn-sm w-100" id="btnConnect">
-                        <i class="bi bi-plug"></i> Conectar USB
-                    </button>
-                </div>
-
-                <!-- Menú Acordeón -->
-                <div class="accordion accordion-flush" id="sidebarAccordion">
-                    
-                    <!-- WIFI -->
-                    <div class="accordion-item bg-transparent border-secondary">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed bg-dark text-info" type="button" data-bs-toggle="collapse" data-bs-target="#collapseWifi">
-                                <i class="bi bi-wifi me-2"></i> WiFi
-                            </button>
-                        </h2>
-                        <div id="collapseWifi" class="accordion-collapse collapse" data-bs-parent="#sidebarAccordion">
-                            <div class="accordion-body bg-dark">
-                                
-                                <div class="subcategory-title">Sniffers</div>
-                                <div class="d-grid gap-1 mb-2">
-                                    <button class="btn btn-outline-secondary btn-sm cmd-btn" data-cmd="sniffprobe">Probe Sniff</button>
-                                    <button class="btn btn-outline-secondary btn-sm cmd-btn" data-cmd="sniffbeacon">Beacon Sniff</button>
-                                    <button class="btn btn-outline-secondary btn-sm cmd-btn" data-cmd="sniffdeauth">Deauth Sniff</button>
-                                    <button class="btn btn-outline-secondary btn-sm cmd-btn" data-cmd="packetcount">Packet Count</button>
-                                    <button class="btn btn-outline-secondary btn-sm cmd-btn" data-cmd="sniffpmkid">PMKID Sniff</button>
-                                    <button class="btn btn-outline-secondary btn-sm cmd-btn" data-cmd="packetmonitor">Pkt Monitor</button>
-                                    <button class="btn btn-outline-secondary btn-sm cmd-btn" data-cmd="channelanalyzer">Ch Analyzer</button>
-                                    <button class="btn btn-outline-secondary btn-sm cmd-btn" data-cmd="channelsummary">Ch Summary</button>
-                                    <button class="btn btn-outline-secondary btn-sm cmd-btn" data-cmd="sniffraw">Raw Capture</button>
-                                    <button class="btn btn-outline-secondary btn-sm cmd-btn" data-cmd="pwnagotchi">Pwnagotchi</button>
-                                    <button class="btn btn-outline-secondary btn-sm cmd-btn" data-cmd="pineapple">Pineapple</button>
-                                </div>
-
-                                <div class="subcategory-title">Scanners</div>
-                                <div class="d-grid gap-1 mb-2">
-                                    <button class="btn btn-outline-info btn-sm cmd-btn" data-cmd="scanall">Scan All</button>
-                                    <button class="btn btn-outline-info btn-sm cmd-btn" data-cmd="scanap">Scan AP</button>
-                                    <button class="btn btn-outline-info btn-sm cmd-btn" data-cmd="scansta">Scan STA</button>
-                                    <button class="btn btn-outline-info btn-sm cmd-btn" data-cmd="pingscan">Ping Scan</button>
-                                    <button class="btn btn-outline-info btn-sm cmd-btn" data-cmd="arpscan">ARP Scan</button>
-                                    <button class="btn btn-outline-info btn-sm cmd-btn" data-cmd="portscan">Port Scan</button>
-                                    <button class="btn btn-outline-info btn-sm cmd-btn" data-cmd="sshescan">SSH Scan</button>
-                                    <button class="btn btn-outline-info btn-sm cmd-btn" data-cmd="telnetscan">Telnet Scan</button>
-                                    <button class="btn btn-outline-info btn-sm cmd-btn" data-cmd="smtpscan">SMTP Scan</button>
-                                    <button class="btn btn-outline-info btn-sm cmd-btn" data-cmd="dnsscan">DNS Scan</button>
-                                    <button class="btn btn-outline-info btn-sm cmd-btn" data-cmd="httpscan">HTTP Scan</button>
-                                    <button class="btn btn-outline-info btn-sm cmd-btn" data-cmd="httpsscan">HTTPS Scan</button>
-                                    <button class="btn btn-outline-info btn-sm cmd-btn" data-cmd="rdpscan">RDP Scan</button>
-                                </div>
-
-                                <div class="subcategory-title">Attacks</div>
-                                <div class="d-grid gap-1 mb-2">
-                                    <button class="btn btn-outline-danger btn-sm cmd-btn" data-cmd="evilportal">Evil Portal</button>
-                                    <button class="btn btn-outline-danger btn-sm cmd-btn" data-cmd="deauth">Deauth Flood</button>
-                                    <button class="btn btn-outline-danger btn-sm cmd-btn" data-cmd="apclonespam">AP Clone Spam</button>
-                                    <button class="btn btn-outline-danger btn-sm cmd-btn" data-cmd="deauthtarget">Deauth Targeted</button>
-                                    <button class="btn btn-outline-danger btn-sm cmd-btn" data-cmd="karma">Karma</button>
-                                    <button class="btn btn-outline-danger btn-sm cmd-btn" data-cmd="badmsg">Bad Msg</button>
-                                    <button class="btn btn-outline-danger btn-sm cmd-btn" data-cmd="badmsgtarget">Bad Msg Targ</button>
-                                    <button class="btn btn-outline-danger btn-sm cmd-btn" data-cmd="assocsleep">Assoc Sleep</button>
-                                    <button class="btn btn-outline-danger btn-sm cmd-btn" data-cmd="assocsleeptarget">Assoc Slp Targ</button>
-                                    <button class="btn btn-outline-danger btn-sm cmd-btn" data-cmd="saecommit">SAE Commit</button>
-                                    <button class="btn btn-outline-danger btn-sm cmd-btn" data-cmd="channelswitch">Ch Switch</button>
-                                    <button class="btn btn-outline-danger btn-sm cmd-btn" data-cmd="quiettime">Quiet Time</button>
-                                </div>
-
-                                <div class="subcategory-title">General</div>
-                                <div class="d-grid gap-1">
-                                    <button class="btn btn-outline-secondary btn-sm cmd-btn" data-cmd="clearstations">Clear Stations</button>
-                                    <button class="btn btn-outline-secondary btn-sm cmd-btn" data-cmd="selecthtml">Select HTML</button>
-                                    <button class="btn btn-outline-secondary btn-sm cmd-btn" data-cmd="selectap">Select APs</button>
-                                    <button class="btn btn-outline-secondary btn-sm cmd-btn" data-cmd="viewap">View AP Info</button>
-                                    <button class="btn btn-outline-secondary btn-sm cmd-btn" data-cmd="selectstation">Select Stations</button>
-                                    <button class="btn btn-outline-secondary btn-sm cmd-btn" data-cmd="join">Join WiFi</button>
-                                    <button class="btn btn-outline-secondary btn-sm cmd-btn" data-cmd="joinsaved">Join Saved</button>
-                                    <button class="btn btn-outline-secondary btn-sm cmd-btn" data-cmd="startap">Start AP</button>
-                                    <button class="btn btn-outline-secondary btn-sm cmd-btn" data-cmd="hostapinfo">Host AP Info</button>
-                                    <button class="btn btn-outline-secondary btn-sm cmd-btn" data-cmd="setmac">Set MACs</button>
-                                    <button class="btn btn-outline-warning btn-sm cmd-btn" data-cmd="shutdown">Shutdown WiFi</button>
-                                    <button class="btn btn-outline-secondary btn-sm cmd-btn" data-cmd="loadwardrive">Load Wardrive</button>
-                                    <button class="btn btn-outline-secondary btn-sm cmd-btn" data-cmd="generatessids">Gen SSIDs</button>
-                                    <button class="btn btn-outline-secondary btn-sm cmd-btn" data-cmd="selectprobessids">Sel Probe SSIDs</button>
-                                    <button class="btn btn-outline-secondary btn-sm cmd-btn" data-cmd="addssids">Add SSIDs</button>
-                                    <button class="btn btn-outline-secondary btn-sm cmd-btn" data-cmd="clearssids">Clear SSIDs</button>
-                                    <button class="btn btn-outline-secondary btn-sm cmd-btn" data-cmd="clearaps">Clear APs</button>
-                                </div>
-
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- BLUETOOTH -->
-                    <div class="accordion-item bg-transparent border-secondary">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed bg-dark text-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBluetooth">
-                                <i class="bi bi-bluetooth me-2"></i> Bluetooth
-                            </button>
-                        </h2>
-                        <div id="collapseBluetooth" class="accordion-collapse collapse" data-bs-parent="#sidebarAccordion">
-                            <div class="accordion-body bg-dark">
-                                
-                                <div class="subcategory-title">Sniffers</div>
-                                <div class="d-grid gap-1 mb-2">
-                                    <button class="btn btn-outline-secondary btn-sm cmd-btn" data-cmd="sniffbt">BT Sniffer</button>
-                                    <button class="btn btn-outline-secondary btn-sm cmd-btn" data-cmd="sniffflipper">Flipper Sniff</button>
-                                    <button class="btn btn-outline-secondary btn-sm cmd-btn" data-cmd="findmy">FindMy Sniff</button>
-                                    <button class="btn btn-outline-secondary btn-sm cmd-btn" data-cmd="findmymonitor">FindMy Monitor</button>
-                                    <button class="btn btn-outline-secondary btn-sm cmd-btn" data-cmd="skimmer">Detect Skimmer</button>
-                                    <button class="btn btn-outline-secondary btn-sm cmd-btn" data-cmd="btanalyze">BT Analyze</button>
-                                    <button class="btn btn-outline-secondary btn-sm cmd-btn" data-cmd="flock">Flock Sniff</button>
-                                    <button class="btn btn-outline-secondary btn-sm cmd-btn" data-cmd="metadetect">Meta Detect</button>
-                                    <button class="btn btn-outline-secondary btn-sm cmd-btn" data-cmd="foxhunt">Fox Hunt</button>
-                                </div>
-
-                                <div class="subcategory-title">Attacks</div>
-                                <div class="d-grid gap-1">
-                                    <button class="btn btn-outline-danger btn-sm cmd-btn" data-cmd="sourapple">Sour Apple</button>
-                                    <button class="btn btn-outline-danger btn-sm cmd-btn" data-cmd="applejuice">Apple Juice</button>
-                                    <button class="btn btn-outline-danger btn-sm cmd-btn" data-cmd="swiftpair">Swiftpair Spam</button>
-                                    <button class="btn btn-outline-danger btn-sm cmd-btn" data-cmd="samsungspam">Samsung Spam</button>
-                                    <button class="btn btn-outline-danger btn-sm cmd-btn" data-cmd="googlespam">Google Spam</button>
-                                    <button class="btn btn-outline-danger btn-sm cmd-btn" data-cmd="flipperspam">Flipper Spam</button>
-                                    <button class="btn btn-outline-danger btn-sm cmd-btn" data-cmd="blespam">BLE Spam All</button>
-                                    <button class="btn btn-outline-danger btn-sm cmd-btn" data-cmd="spoofairtag">Spoof AirTag</button>
-                                    <button class="btn btn-outline-danger btn-sm cmd-btn" data-cmd="findmysound">FindMy Sound</button>
-                                </div>
-
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- GPS -->
-                    <div class="accordion-item bg-transparent border-secondary">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed bg-dark text-success" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGPS">
-                                <i class="bi bi-geo-alt me-2"></i> GPS
-                            </button>
-                        </h2>
-                        <div id="collapseGPS" class="accordion-collapse collapse" data-bs-parent="#sidebarAccordion">
-                            <div class="accordion-body bg-dark">
-                                <div class="d-grid gap-1">
-                                    <button class="btn btn-outline-success btn-sm cmd-btn" data-cmd="gpsdata">GPS Data</button>
-                                    <button class="btn btn-outline-success btn-sm cmd-btn" data-cmd="nmea">NMEA Stream</button>
-                                    <button class="btn btn-outline-success btn-sm cmd-btn" data-cmd="tracker start">Start Tracker</button>
-                                    <button class="btn btn-outline-success btn-sm cmd-btn" data-cmd="tracker stop">Stop Tracker</button>
-                                    <button class="btn btn-outline-success btn-sm cmd-btn" data-cmd="gpspoi">GPS POI</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- SISTEMA -->
-                    <div class="accordion-item bg-transparent border-secondary">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed bg-dark text-warning" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSystem">
-                                <i class="bi bi-gear me-2"></i> Sistema
-                            </button>
-                        </h2>
-                        <div id="collapseSystem" class="accordion-collapse collapse" data-bs-parent="#sidebarAccordion">
-                            <div class="accordion-body bg-dark">
-                                <div class="d-grid gap-1">
-                                    <button class="btn btn-outline-warning btn-sm cmd-btn" data-cmd="info">Device Info</button>
-                                    <button class="btn btn-outline-warning btn-sm cmd-btn" data-cmd="ls /">Listar SD</button>
-                                    <button class="btn btn-outline-warning btn-sm cmd-btn" data-cmd="brightness">Brillo Pantalla</button>
-                                    <button class="btn btn-outline-warning btn-sm cmd-btn" data-cmd="settings">Ajustes</button>
-                                    <button class="btn btn-danger btn-sm cmd-btn mt-3" data-cmd="stopscan">
-                                        <i class="bi bi-x-octagon"></i> DETENER TODO (stopscan)
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div> <!-- Fin Acordeón -->
-            </div>
-
-            <!-- ==================== PANEL PRINCIPAL ==================== -->
-            <div class="col-md-8 col-lg-9 col-xl-10 main-panel p-3">
-                
-                <!-- Cabecera de la Terminal -->
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h4 class="m-0 text-light"><i class="bi bi-terminal text-info"></i> Consola de Operaciones</h4>
-                    <div>
-                        <button class="btn btn-sm btn-outline-secondary" id="btnExport"><i class="bi bi-download"></i> Exportar Log</button>
-                        <button class="btn btn-sm btn-outline-secondary" id="btnClear"><i class="bi bi-trash"></i> Limpiar</button>
-                    </div>
-                </div>
-
-                <!-- Ventana de la Terminal -->
-                <div class="terminal-window" id="terminalOutput">> Esperando conexión con el ESP32 Marauder...</div>
-
-                <!-- Área de Entrada -->
-                <div class="input-group mt-3">
-                    <span class="input-group-text bg-dark text-muted border-secondary">&gt;_</span>
-                    <input type="text" id="commandInput" class="form-control bg-dark text-light border-secondary font-monospace" placeholder="Escribe un comando manual (ej. help)..." disabled>
-                    <button class="btn btn-info fw-bold" id="btnSend" disabled><i class="bi bi-send"></i> Enviar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Bootstrap 5 JS Bundle (necesario para el Acordeón) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <script>
-        // --- VARIABLES GLOBALES ---
-        let port;
-        let writer;
-        let reader;
-        let readLoopRunning = false;
-
-        // --- ELEMENTOS DEL DOM ---
-        const btnConnect = document.getElementById('btnConnect');
-        const statusDot = document.getElementById('statusDot');
-        const statusText = document.getElementById('statusText');
-        const terminalOutput = document.getElementById('terminalOutput');
-        const commandInput = document.getElementById('commandInput');
-        const btnSend = document.getElementById('btnSend');
-        const btnClear = document.getElementById('btnClear');
-        const btnExport = document.getElementById('btnExport');
-
-        // --- LÓGICA DE CONEXIÓN WEB SERIAL ---
-        btnConnect.addEventListener('click', async () => {
-            if (port) {
-                // Desconectar
-                try {
-                    if (reader) await reader.cancel();
-                    if (writer) writer.releaseLock();
-                    await port.close();
-                    port = null;
-                    readLoopRunning = false;
-                    
-                    // UI Desconectado
-                    statusDot.className = 'badge bg-danger me-1';
-                    statusText.textContent = 'Desconectado';
-                    btnConnect.innerHTML = '<i class="bi bi-plug"></i> Conectar USB';
-                    btnConnect.className = 'btn btn-outline-info btn-sm w-100';
-                    commandInput.disabled = true;
-                    btnSend.disabled = true;
-                    terminalOutput.innerHTML += '\n[!] Desconectado del puerto serie.\n';
-                } catch (err) {
-                    console.error("Error al desconectar:", err);
-                }
-                return;
-            }
-
-            try {
-                port = await navigator.serial.requestPort();
-                await port.open({ baudRate: 115200 });
-                
-                writer = port.writable.getWriter();
-                
-                // UI Conectado
-                statusDot.className = 'badge bg-success me-1';
-                statusText.textContent = 'Conectado';
-                btnConnect.innerHTML = '<i class="bi bi-x-circle"></i> Desconectar';
-                btnConnect.className = 'btn btn-outline-danger btn-sm w-100';
-                commandInput.disabled = false;
-                btnSend.disabled = false;
-                terminalOutput.innerHTML = '[+] Conectado a 115200 baudios. Esperando datos...\n';
-                
-                readLoopRunning = true;
-                readLoop();
-
-            } catch (err) {
-                console.error("Error de conexión:", err);
-                alert("Error al conectar. Asegúrate de que:\n1. El Marauder esté conectado por USB.\n2. Otro programa (como Arduino IDE o Putty) no esté usando el puerto.\n3. Estés usando Chrome o Edge.");
-            }
-        });
-
-        // --- BUCLE DE LECTURA ---
-        async function readLoop() {
-            const textDecoder = new TextDecoderStream();
-            const readableStreamClosed = port.readable.pipeTo(textDecoder.writable);
-            reader = textDecoder.readable.getReader();
-
-            try {
-                while (readLoopRunning) {
-                    const { value, done } = await reader.read();
-                    if (done) break;
-                    if (value) {
-                        const cleanValue = value.replace(/\0/g, '');
-                        terminalOutput.innerHTML += cleanValue;
-                        terminalOutput.scrollTop = terminalOutput.scrollHeight;
-                    }
-                }
-            } catch (error) {
-                if (readLoopRunning) console.error("Error de lectura:", error);
-            } finally {
-                reader.releaseLock();
-            }
-        }
-
-        // --- ENVIAR COMANDOS ---
-        async function sendCommand(cmd) {
-            if (!writer || !port) return;
-            
-            const encoder = new TextEncoder();
-            await writer.write(encoder.encode(cmd + '\n'));
-            
-            terminalOutput.innerHTML += `\n<span class="text-warning">&gt; ${cmd}</span>\n`;
-            terminalOutput.scrollTop = terminalOutput.scrollHeight;
-        }
-
-        // Eventos de Botones
-        document.querySelectorAll('.cmd-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const cmd = btn.getAttribute('data-cmd');
-                if (cmd) sendCommand(cmd);
-            });
-        });
-
-        // Evento de Input Manual
-        btnSend.addEventListener('click', () => {
-            const cmd = commandInput.value.trim();
-            if (cmd) {
-                sendCommand(cmd);
-                commandInput.value = '';
-            }
-        });
-
-        commandInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') btnSend.click();
-        });
-
-        // --- UTILIDADES ---
-        btnClear.addEventListener('click', () => {
-            terminalOutput.innerHTML = '> Terminal limpia.\n';
-        });
-
-        btnExport.addEventListener('click', () => {
-            const text = terminalOutput.innerText;
-            const blob = new Blob([text], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `marauder_log_${new Date().toISOString().slice(0,10)}.txt`;
-            a.click();
-            URL.revokeObjectURL(url);
-        });
-
-    </script>
-</body>
-</html>
+let port=null,reader=null,readTask=null,closing=null,state='disconnected',txQueue=Promise.resolve(),rxBytes=0,started=0;
+let transcript='',displayPending=false,events=[],history=[],historyIndex=0,listing=null,lastListing='',listingRows=[];
+const MAX_LOG=2*1024*1024,MAX_VIEW=250000;
+function log(text,type='rx'){transcript=(transcript+text).slice(-MAX_LOG);events.push({text,type});if(!displayPending){displayPending=true;requestAnimationFrame(()=>{displayPending=false;for(const e of events){const span=document.createElement('span');span.className=e.type;span.textContent=e.text;$('terminal').append(span)}events=[];while($('terminal').textContent.length>MAX_VIEW&&$('terminal').childNodes.length>1)$('terminal').firstChild.remove();if($('terminal').textContent.length>MAX_VIEW)$('terminal').lastChild.textContent=$('terminal').lastChild.textContent.slice(-MAX_VIEW);if($('autoscroll').checked)$('terminal').scrollTop=$('terminal').scrollHeight})}}
+function error(e){$('message').textContent=e.message||String(e);log('\n[error] '+$('message').textContent+'\n','error')}
+function refresh(){const connected=state==='connected',busy=state==='connecting'||state==='closing';$('connect').disabled=busy||!('serial'in navigator)||!isSecureContext;$('connect').textContent=connected?'Desconectar':busy?'Procesando…':'Conectar dispositivo';$('stateText').textContent=({connected:'Conectado',disconnected:'Desconectado',connecting:'Conectando',closing:'Cerrando puerto'})[state];$('status').classList.toggle('online',connected);document.querySelectorAll('[data-command]').forEach(b=>b.disabled=!connected||b.hasAttribute('data-unavailable')||(!!listing&&b.dataset.command!=='stopscan'));$('send').disabled=!connected||!!listing;$('listSD').disabled=!connected||!!listing;$('finishList').disabled=!listing;$('runAction').disabled=!connected||!!listing}
+async function connect(){if(state!=='disconnected')return;state='connecting';refresh();$('message').textContent='';try{port=await navigator.serial.requestPort();await port.open({baudRate:115200,dataBits:8,stopBits:1,parity:'none',flowControl:'none'});rxBytes=0;$('rx').textContent='0 B';started=Date.now();state='connected';log('\n[USB] Puerto abierto · 115200 / 8N1. Ejecuta info y help.\n','sys');readTask=readLoop(port);refresh()}catch(e){if(port){try{await port.close()}catch{}}port=null;state='disconnected';refresh();if(e.name!=='NotFoundError')error(e)}}
+async function readLoop(activePort){const decoder=new TextDecoder();try{reader=activePort.readable.getReader();while(state==='connected'){const {value,done}=await reader.read();if(done)break;rxBytes+=value.byteLength;$('rx').textContent=rxBytes.toLocaleString('es')+' B';const text=decoder.decode(value,{stream:true});log(text);receiveListing(text)}const tail=decoder.decode();if(tail){log(tail);receiveListing(tail)}}catch(e){if(state==='connected')error(e)}finally{if(reader){reader.releaseLock();reader=null}if(state==='connected')queueMicrotask(()=>disconnect())}}
+async function disconnect(){if(closing)return closing;if(!port)return;state='closing';refresh();closing=(async()=>{finishListing('Lectura interrumpida al cerrar el puerto.');try{if(reader)await reader.cancel();if(readTask)await readTask;await txQueue;await port.close()}catch(e){error(e)}finally{port=null;readTask=null;state='disconnected';started=0;$('session').textContent='Sin conexión';log('\n[USB] Puerto cerrado. Desconectar USB no detiene un escaneo autónomo.\n','sys');closing=null;refresh()}})();return closing}
+function send(command){command=command.trim();if(!command||/[\r\n\x00-\x1f\x7f]/.test(command)||new TextEncoder().encode(command).length>512)return Promise.reject(new Error('Introduce una sola línea de hasta 512 bytes, sin caracteres de control.'));if(state!=='connected'||!port)return Promise.reject(new Error('Conecta el dispositivo primero.'));if(command==='reboot'&&!confirm('¿Reiniciar el Marauder? Se interrumpirá la operación actual.'))return Promise.resolve();const target=port,line=command+($('eol').value==='crlf'?'\r\n':'\n');const task=txQueue.then(async()=>{if(state!=='connected'||target!==port)throw new Error('La conexión cambió antes del envío.');const writer=target.writable.getWriter();try{await writer.write(new TextEncoder().encode(line));log('\n❯ '+command+'\n','tx')}finally{writer.releaseLock()}});txQueue=task.catch(()=>{});return task}
+function finishListing(reason='Lectura finalizada manualmente; no se puede garantizar que el listado esté completo.'){if(!listing)return;clearTimeout(listing.timeout);if(listing.pending)parseEntry(listing.pending);lastListing=listing.raw;listing=null;$('listingStatus').textContent=reason;refresh()}
+function parseEntry(line){const match=line.replace(/\r$/,'').match(/^(.+)\t(\d+)\s*$/);if(!match||listingRows.length>=2000)return;if(!listingRows.length)$('files').replaceChildren();listingRows.push({name:match[1],size:match[2]});const tr=document.createElement('tr');for(const text of [match[1],match[2],'Lector SD']){const td=document.createElement('td');td.textContent=text;tr.append(td)}$('files').append(tr)}
+function receiveListing(text){if(!listing)return;listing.raw=(listing.raw+text).slice(-MAX_LOG);listing.pending+=text;let i;while((i=listing.pending.indexOf('\n'))>=0){parseEntry(listing.pending.slice(0,i));listing.pending=listing.pending.slice(i+1)}if(listing.pending.length>8192)listing.pending=listing.pending.slice(-8192)}
+async function listSD(){if(listing)return;const path=$('path').value.trim();if(!/^\/[^\s\x00-\x1f"'\\]*$/.test(path)){error(new Error('Usa una ruta absoluta sin espacios, comillas ni controles, por ejemplo / o /logs.'));return}listingRows=[];lastListing='';$('files').replaceChildren();$('listingStatus').textContent='Leyendo respuesta. Pulsa Finalizar lectura cuando termine; ls no incluye marcador de fin.';listing={raw:'',pending:'',timeout:setTimeout(()=>finishListing('Ventana de 30 s cerrada. El listado puede estar incompleto; repite si es necesario.'),30000)};refresh();try{await send('ls '+path)}catch(e){finishListing('No se pudo consultar la SD.');error(e)}}
+function download(content,name,type='text/plain;charset=utf-8'){const url=URL.createObjectURL(content instanceof Blob?content:new Blob([content],{type})),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),30000)}
+$('connect').onclick=()=>{if(state==='connected')void disconnect();else void connect()};
+document.querySelectorAll('[data-command]').forEach(b=>b.onclick=()=>{
+ if(b.hasAttribute('data-unavailable'))return;
+ if(b.dataset.command==='stopscan'){finishListing('Consulta SD finalizada para enviar stopscan.');void send('stopscan').catch(error);return}
+ if(b.dataset.action){openAction(ACTIONS.get(b.dataset.action),b);return}
+ if(b.dataset.command==='ls /'){$('path').value='/';void listSD();return}
+ void send(b.dataset.command).catch(error);
+});
+$('cli').onsubmit=async e=>{e.preventDefault();if(listing)return;const value=$('command').value.trim();try{await send(value);history.push(value);history=history.slice(-100);historyIndex=history.length;$('command').value=''}catch(e){error(e)}};
+$('command').onkeydown=e=>{if(!['ArrowUp','ArrowDown'].includes(e.key))return;e.preventDefault();historyIndex=Math.max(0,Math.min(history.length,historyIndex+(e.key==='ArrowUp'?-1:1)));$('command').value=history[historyIndex]||''};
+$('listSD').onclick=listSD;$('finishList').onclick=()=>finishListing();$('saveListing').onclick=()=>download(listing?listing.raw:lastListing,'marauder-sd-listing.txt');
+$('export').onclick=()=>download(transcript,'marauder-session-'+new Date().toISOString().replace(/[:.]/g,'-')+'.log');
+$('clear').onclick=()=>{events=[];$('terminal').replaceChildren()};
+$('localFiles').onchange=()=>{$('localList').replaceChildren();for(const file of $('localFiles').files){const row=document.createElement('div');row.className='local';const name=document.createElement('span'),button=document.createElement('button');name.textContent=file.name+' · '+file.size.toLocaleString('es')+' bytes';button.textContent='Guardar copia';button.onclick=()=>download(file,file.name);row.append(name,button);$('localList').append(row)}};
+if('serial'in navigator)navigator.serial.addEventListener('disconnect',e=>{if(e.target===port||e.port===port)void disconnect()});
+setInterval(()=>{if(started)$('session').textContent=Math.floor((Date.now()-started)/60000)+' min '+Math.floor((Date.now()-started)/1000)%60+' s'},1000);
+if(!('serial'in navigator)||!isSecureContext){$('compat').hidden=false;$('compat').textContent='Web Serial requiere un navegador compatible (Chrome/Edge de escritorio) y HTTPS o localhost. La compatibilidad en tablets depende del navegador y del sistema.'}
+log('MARAUDER / SERIAL CONSOLE\n\nConecta tu dispositivo para comenzar.\n115200 baudios · 8 bits · sin paridad · 1 bit de parada\n\nPerfil: v6.1 / v1.16.0 (pendiente de verificar con info).\nLa salida del equipo aparecerá aquí.\n','sys');refresh();
+</script></body></html>
