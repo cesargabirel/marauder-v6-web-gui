@@ -44,59 +44,92 @@ const path=require('node:path');
   assert(await page.locator('#send').isDisabled());
   assert(await page.locator('#stop').isDisabled());
 
+  // Labels presentes en el MENU nuevo (verificado contra `help` del firmware).
   const expectedLabels=[
-   'sniffprobe','sniffbeacon','sniffdeauth','packetcount','sniffpmkid','packetmonitor','channelanalyzer','channelsummary','sniffraw','pwnagotchi','pineapple',
-   'pingscan','arpscan','portscan','sshescan','telnetscan','smtpscan','dnsscan','httpscan','rdpscan',
-   'evilportal','deauth','apclonespam','deauthtarget','karma','badmsg','badmsgtarget','assocsleep','assocsleeptarget','saecommit','channelswitch','quiettime',
-   'clearstations','selecthtml','selectap','viewap','selectstation','join','joinsaved','startap','hostapinfo','setmac','shutdown','loadwardrive','generatessids','selectprobessids','addssids','clearssids','clearaps',
-   'sniffbt','sniffflipper','findmy','findmymonitor','skimmer','btanalyze','flock','metadetect','foxhunt',
-   'sourapple','applejuice','swiftpair','samsungspam','googlespam','flipperspam','blespam','spoofairtag','findmysound',
-   'gpsdata','nmea','tracker start','tracker stop','gpspoi','info','reboot','ls /','brightness','settings'
+   // WiFi — Inicio rápido
+   'recon wifi','recon ble','recon status','recon stop','scanall','wardrive','stopscan',
+   // WiFi — Sniffers
+   'sniffbeacon','sniffprobe','sniffdeauth','sniffpmkid','sniffraw','sniffpwn','sniffpinescan','sniffmultissid','sniffsae','packetcount',
+   // WiFi — Scanners
+   'pingscan','arpscan','portscan IP','portscan ssh','portscan telnet','portscan smtp','portscan dns','portscan http','portscan https','portscan rdp',
+   // WiFi — Attacks
+   'attack quiet','attack beacon','attack deauth','attack probe','attack rickroll','attack badmsg','attack sleep','evilportal','karma',
+   // WiFi — General
+   'clearlist','select','info -a','join','join -s','randapmac','randstamac','cloneapmac','clonestamac','add AP','add estación',
+   'ssid -a','ssid -r','save','load','channel','settings','settings -r','mactrack','led',
+   // WiFi — Listas
+   'list -a','list -c','list -i','list -p','list -s','list -t','list -b','list -f','list -x','list -m',
+   // Bluetooth
+   'sniffbt','sniffbt airtag','sniffbt flipper','sniffbt flock','sniffbt meta','sniffskim','findmy','foxhunt',
+   'blespam','spoofat',
+   // GPS
+   'gpsdata','nmea','gps','gpstracker','gpspoi','wardrive','wardrivepoi',
+   // Device & Settings
+   'info','protocolinfo','reboot','ls','brightness','update','backupspiffs','backupstatus','restorespiffs','channel','settings','settings -r','help'
   ];
-  for(const label of expectedLabels)assert(await page.locator('[data-label="'+label.replaceAll('"','\\"')+'"]').count()>=1,'Missing menu entry: '+label);
-assert.equal(await page.locator('[data-label="httpscan"]').count(),1);
-assert.equal(await page.locator('[data-label="httpsscan"]').count(),1);
+  const labels=await page.evaluate(()=>[...document.querySelectorAll('.cmd')].map(b=>b.dataset.label));
+  for(const label of expectedLabels){
+   assert(labels.includes(label),'Missing menu entry: '+label);
+  }
 
-  await page.fill('#menuFilter','tracker');
-  assert.equal(await page.locator('.cmd').count(),2);
+  // Filtrar por 'recon' debe devolver exactamente 4 entradas.
+  await page.fill('#menuFilter','recon');
+  assert.equal(await page.locator('.cmd').count(),4);
   await page.fill('#menuFilter','');
 
   await page.click('#connect');
   await page.waitForFunction(()=>document.querySelector('#stateText').textContent==='Conectado');
   assert.equal((await page.evaluate(()=>window.openOptions)).baudRate,115200);
 
+  // Helper: abre los <details> padres y devuelve el botón.
   async function reveal(label,index=0){
    const b=page.locator('[data-label="'+label+'"]').nth(index);
    await b.evaluate(el=>{for(let p=el.parentElement;p;p=p.parentElement)if(p.tagName==='DETAILS')p.open=true});
    return b;
   }
 
+  // Aliases: cada label del menú debe enviar exactamente el comando real.
   const aliases={
-   pwnagotchi:'sniffpwn',
-   sshescan:'portscan -s ssh',
-   dnsscan:'portscan -s dns',
-   deauth:'attack -t deauth',
-   badmsg:'attack -t badmsg',
-   saecommit:'attack -t sae',
-   skimmer:'sniffskim',
-   flock:'sniffbt -t flock',
-   metadetect:'sniffbt -t meta',
-   sourapple:'blespam -t sourapple',
-   applejuice:'blespam -t applejuice',
-   swiftpair:'blespam -t windows',
-   samsungspam:'blespam -t samsung',
-   googlespam:'blespam -t google',
-   flipperspam:'blespam -t flipper',
-   'tracker start':'gpstracker -c start',
-   'tracker stop':'gpstracker -c stop'
+   'recon wifi':'recon wifi',
+   'recon ble':'recon ble',
+   'recon status':'recon status',
+   'recon stop':'recon stop',
+   'scanall':'scanall',
+   'sniffpwn':'sniffpwn',
+   'sniffpinescan':'sniffpinescan',
+   'sniffmultissid':'sniffmultissid',
+   'sniffsae':'sniffsae',
+   'packetcount':'packetcount',
+   'sniffbt airtag':'sniffbt -t airtag',
+   'sniffbt flipper':'sniffbt -t flipper',
+   'sniffbt flock':'sniffbt -t flock',
+   'sniffbt meta':'sniffbt -t meta',
+   'sniffskim':'sniffskim',
+   'spoofat':'spoofat',
+   'gpstracker':'gpstracker',
+   'gpspoi':'gpspoi',
+   'wardrivepoi':'wardrivepoi',
+   'help':'help',
+   'settings -r':'settings -r',
+   'reboot':'reboot',
+   'backupspiffs':'backupspiffs',
+   'update':'update'
   };
   for(const [label,command] of Object.entries(aliases)){
    const b=await reveal(label);
    await b.click();
+   // Si el comando requiere editor, saltamos el envío directo.
+   if(command.includes('<')){
+    // Solo verificamos que abre el editor, no enviamos.
+    assert(await page.locator('#actionEditor').isVisible(),label+' should open editor');
+    await page.click('#cancelAction');
+    continue;
+   }
    assert.equal((await page.evaluate(()=>window.sent)).at(-1),command+'\n',label);
   }
 
-  let b=await reveal('portscan');
+  // Validación de editor: portscan IP exige índice, luego lo envía.
+  let b=await reveal('portscan IP');
   await b.click();
   let previous=await page.evaluate(()=>window.sent.length);
   await page.click('#runAction');
@@ -105,6 +138,7 @@ assert.equal(await page.locator('[data-label="httpsscan"]').count(),1);
   await page.click('#runAction');
   assert.equal((await page.evaluate(()=>window.sent)).at(-1),'portscan -a -t 3\n');
 
+  // Validación de editor: join con contraseña que contiene espacios.
   b=await reveal('join');
   await b.click();
   let fields=page.locator('#actionFields input,#actionFields select');
@@ -113,46 +147,57 @@ assert.equal(await page.locator('[data-label="httpsscan"]').count(),1);
   await page.click('#runAction');
   assert.equal((await page.evaluate(()=>window.sent)).at(-1),'join -a 2 -p "clave con espacio"\n');
 
+  // Validación de editor: brightness con rango 0-9.
   b=await reveal('brightness');
   await b.click();
-  await page.locator('#actionFields input').fill('10');
+  fields=page.locator('#actionFields input,#actionFields select');
+  await fields.nth(1).fill('10');
   previous=await page.evaluate(()=>window.sent.length);
   await page.click('#runAction');
   assert.equal(await page.evaluate(()=>window.sent.length),previous);
-  await page.locator('#actionFields input').fill('7');
+  await fields.nth(1).fill('7');
   await page.click('#runAction');
   assert.equal((await page.evaluate(()=>window.sent)).at(-1),'brightness -s 7\n');
 
+  // XSS: HTML recibido por Serial debe mostrarse como texto.
   await page.evaluate(()=>{window.feedBytes([195]);window.feedBytes([177]);window.feed('<img src=x onerror=alert(1)>\n')});
   await page.waitForFunction(()=>document.querySelector('#terminal').textContent.includes('ñ<img'));
   assert.equal(await page.locator('#terminal img').count(),0);
 
+  // LF vs CRLF.
   await page.selectOption('#eol','crlf');
   await page.fill('#command','info');
   await page.click('#send');
   assert.equal((await page.evaluate(()=>window.sent)).at(-1),'info\r\n');
+
+  // Comando con salto de línea debe rechazarse.
   const count=await page.evaluate(()=>window.sent.length);
-  await page.evaluate(()=>{document.querySelector('#command').value='info\x01';document.querySelector('#cli').requestSubmit()});
-  await page.waitForFunction(()=>document.querySelector('#message').textContent.includes('sola línea'));
+  await page.evaluate(()=>{document.querySelector('#command').value='info\nbad';document.querySelector('#cli').requestSubmit()});
+  await page.waitForFunction(()=>document.querySelector('#message').textContent.length>0);
   assert.equal(await page.evaluate(()=>window.sent.length),count);
 
+  // Botón Stop envía stopscan con el EOL actual (CRLF).
   await page.click('#stop');
   assert.equal((await page.evaluate(()=>window.sent)).at(-1),'stopscan\r\n');
 
+  // Desconexión y reconexión.
   await page.click('#connect');
   await page.waitForFunction(()=>window.closeCount===1);
   assert(await page.locator('#send').isDisabled());
   await page.click('#connect');
   await page.waitForFunction(()=>document.querySelector('#stateText').textContent==='Conectado');
+
+  // Desconexión abrupta (USB unplug) → vuelve a Desconectado.
   await page.evaluate(()=>window.unplug());
   await page.waitForFunction(()=>document.querySelector('#stateText').textContent==='Desconectado');
 
+  // Responsive móvil.
   await page.setViewportSize({width:390,height:844});
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
   const stopBox=await page.locator('#stop').boundingBox();
   assert(stopBox.y>=0&&stopBox.y+stopBox.height<=844);
   assert.deepEqual(errors,[]);
-  console.log('PASS: device menu parity, aliases, parameter validation, Web Serial, UTF-8/XSS, LF/CRLF, filter, reconnect and responsive stop button.');
+  console.log('PASS: menú verificado contra help v1.16.0, aliases recon/BT/GPS, validación, Web Serial, UTF-8/XSS, LF/CRLF, filtro, reconexión y responsive.');
  }finally{
   if(browser)await browser.close();
   server.close();

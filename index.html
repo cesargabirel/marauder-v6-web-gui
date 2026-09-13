@@ -5,96 +5,981 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="dark">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
-<title>Marauder v6.1 · Web GUI</title>
+<title>Marauder v6.1 · Web Serial GUI</title>
 <style>
-:root{--bg:#090d13;--panel:#101720;--panel2:#0c121a;--line:#263342;--text:#e7eef7;--muted:#91a0b4;--mint:#66edb5;--blue:#79adff;--amber:#efc36b;--red:#ff8293;font-family:Inter,Segoe UI,system-ui,sans-serif;color:var(--text);background:var(--bg)}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text)}button,input,select{font:inherit}button{color:var(--text);background:#182331;border:1px solid #34465a;border-radius:8px;padding:9px 11px;cursor:pointer}button:hover:enabled{border-color:var(--mint);background:#20342f}button:disabled{opacity:.45;cursor:not-allowed}button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--mint);outline-offset:2px}.primary{background:var(--mint);color:#062319;border-color:var(--mint);font-weight:750}.danger{border-color:#643442;color:#ffadba}.muted{color:var(--muted)}code{font-family:Consolas,monospace}
-header{height:78px;padding:14px 22px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:16px;background:#0c1219;position:sticky;top:0;z-index:30}.brand{display:flex;align-items:center;gap:12px}.logo{width:42px;height:42px;display:grid;place-items:center;background:var(--mint);color:#052117;font-weight:900;border-radius:10px}.brand h1{font-size:17px;letter-spacing:2px;margin:0}.brand small{color:var(--muted)}.connection{display:flex;align-items:center;gap:11px}.status{font-size:12px;display:flex;align-items:center;gap:7px}.dot{width:9px;height:9px;border-radius:50%;background:#7d8998}.online .dot{background:var(--mint);box-shadow:0 0 14px #66edb577}
-.layout{display:grid;grid-template-columns:310px minmax(0,1fr);min-height:calc(100vh - 78px)}aside{border-right:1px solid var(--line);background:#0c1219;max-height:calc(100vh - 78px);overflow:auto;position:sticky;top:78px;padding:17px 14px 86px}.side-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.side-head strong{font-size:12px;text-transform:uppercase;letter-spacing:1.4px}.count{font:11px Consolas,monospace;color:var(--mint)}#menuFilter{width:100%;background:#080d13;border:1px solid var(--line);color:var(--text);padding:10px;border-radius:8px;margin-bottom:12px}.group{border-top:1px solid var(--line)}summary{cursor:pointer;padding:12px 7px;font-weight:700;list-style-position:inside}.group>summary{color:var(--mint)}.sub{margin-left:9px;border-left:1px solid var(--line);padding-left:7px}.sub>summary{font-size:12px;color:var(--muted)}.cmd{width:100%;text-align:left;margin:3px 0;padding:8px 9px;background:transparent;border-color:transparent;display:block}.cmd:hover:enabled{border-color:#314355;background:#111c27}.cmd .name{display:block;font:12px Consolas,monospace;color:#dfe8f3}.cmd .wire{display:block;margin-top:3px;font:10px Consolas,monospace;color:var(--muted);overflow-wrap:anywhere}.cmd.attack .name{color:#ffb0bb}.cmd.param .name:after{content:'  •';color:var(--amber)}.stop{position:fixed;left:18px;bottom:16px;z-index:35;width:276px;box-shadow:0 8px 30px #0009;background:#321c24;color:#ffb4c0;border-color:#70404b}
-main{padding:22px;min-width:0;max-width:1500px;width:100%;margin:0 auto}.hero{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:17px}.hero h2{margin:3px 0 5px;font-size:23px}.eyebrow{text-transform:uppercase;letter-spacing:1.5px;font-size:10px;color:var(--muted)}.badge{font:11px Consolas,monospace;border:1px solid #365064;padding:5px 8px;border-radius:6px;color:var(--mint)}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}.stat{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px}.stat span{display:block;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}.stat strong{display:block;margin-top:7px;font-size:13px}.panel{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--panel);margin-bottom:14px}.bar{min-height:48px;padding:10px 13px;display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid var(--line)}.bar h3{font-size:13px;margin:0}.tools{display:flex;gap:7px;align-items:center;flex-wrap:wrap}.tools button{font-size:11px;padding:6px 9px}.terminal{height:390px;margin:0;padding:15px;background:#060a0f;color:#c8d8e8;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;font:12px/1.7 Consolas,monospace}.terminal .tx{color:var(--mint)}.terminal .sys{color:var(--muted)}.terminal .err{color:var(--red)}#cli{display:flex;gap:9px;align-items:center;padding:10px 12px;border-top:1px solid var(--line)}#command{flex:1;min-width:0;border:0;background:transparent;color:var(--text);padding:9px}.prompt{color:var(--mint);font-family:Consolas,monospace}select{background:#0a1017;color:var(--text);border:1px solid var(--line);border-radius:7px;padding:8px}.notice{padding:11px 13px;border:1px solid #644f2c;background:#211c12;border-radius:9px;color:#e8cb91;font-size:12px;margin-bottom:14px}.editor{padding:14px}.editor[hidden]{display:none}.editor-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.editor label{font-size:11px;color:var(--muted)}.editor input,.editor select{display:block;width:100%;margin-top:5px;background:#090f16;border:1px solid var(--line);color:var(--text);padding:9px;border-radius:7px}.preview{display:block;margin:12px 0;padding:10px;background:#07100d;border:1px solid #22493b;border-radius:7px;color:var(--mint);overflow-wrap:anywhere}.editor-actions{display:flex;gap:8px}.editor p{font-size:12px;line-height:1.5;color:var(--muted)}.error{color:var(--red)!important;min-height:18px}.settings-note{padding:13px;font-size:12px;line-height:1.6;color:var(--muted)}
-@media(max-width:900px){.layout{grid-template-columns:245px minmax(0,1fr)}.stop{width:211px}.stats{grid-template-columns:1fr 1fr}.stat:last-child{grid-column:1/-1}}
-@media(max-width:650px){header{height:auto;position:static;flex-wrap:wrap}.layout{display:block}.connection{width:100%;justify-content:space-between}aside{position:static;max-height:360px;border-right:0;border-bottom:1px solid var(--line);padding-bottom:14px}.stop{left:10px;right:10px;width:calc(100% - 20px);bottom:10px}.stats{grid-template-columns:1fr}.stat:last-child{grid-column:auto}main{padding:15px}.hero{flex-direction:column}.terminal{height:330px}#cli{flex-wrap:wrap}#command{min-width:65%}.editor-grid{grid-template-columns:1fr}body{padding-bottom:68px}}
+:root{
+  --bg:#0a0f16;
+  --bg-2:#0d141d;
+  --panel:#111a25;
+  --panel-2:#0e1620;
+  --line:#1e2b3a;
+  --line-2:#28394d;
+  --text:#e8eef7;
+  --muted:#8b9bb0;
+  --muted-2:#6b7a8f;
+  --mint:#5fecb0;
+  --mint-2:#1a4d3c;
+  --blue:#7aadff;
+  --amber:#efc36b;
+  --red:#ff8293;
+  --red-2:#3d1f28;
+  --shadow:0 1px 2px #0006,0 4px 14px #0004;
+  --radius:10px;
+  --radius-sm:7px;
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+  color:var(--text);
+  background:var(--bg);
+  font-synthesis:none;
+  text-rendering:optimizeLegibility;
+  -webkit-font-smoothing:antialiased;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;background:#16222f;border:1px solid var(--line-2);border-radius:var(--radius-sm);padding:8px 12px;transition:background .12s,border-color .12s,transform .06s}
+button:hover:enabled{background:#1c2c3d;border-color:var(--mint)}
+button:active:enabled{transform:translateY(1px)}
+button:disabled{opacity:.45;cursor:not-allowed}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible,a:focus-visible{outline:2px solid var(--mint);outline-offset:2px}
+.primary{background:var(--mint);color:#05231a;border-color:var(--mint);font-weight:600}
+.primary:hover:enabled{background:#7dffc4;border-color:#7dffc4}
+.danger{background:var(--red-2);color:#ffb4bf;border-color:#5a2d38}
+.danger:hover:enabled{background:#4a2530;border-color:var(--red)}
+.muted{color:var(--muted)}
+code,.mono{font-family:'JetBrains Mono',Consolas,'SF Mono',Menlo,monospace}
+a{color:var(--mint);text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* Header */
+header{
+  position:sticky;top:0;z-index:40;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding:12px 22px;
+  background:linear-gradient(180deg,#0f1720,#0b1219);
+  border-bottom:1px solid var(--line);
+  box-shadow:0 1px 0 #0008;
+}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{
+  width:40px;height:40px;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--mint),#3bd39a);
+  color:#04251b;font-weight:900;font-size:20px;border-radius:9px;
+  box-shadow:0 2px 10px #5fecb055;
+}
+.brand h1{font-size:16px;letter-spacing:2px;margin:0;font-weight:800}
+.brand small{color:var(--muted);font-size:11px;letter-spacing:.5px}
+.connection{display:flex;align-items:center;gap:12px}
+.status{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);padding:6px 10px;background:#0a121a;border:1px solid var(--line);border-radius:20px}
+.dot{width:8px;height:8px;border-radius:50%;background:#7d8998;transition:background .2s,box-shadow .2s}
+.online .dot{background:var(--mint);box-shadow:0 0 10px #5fecb0aa}
+.online{color:var(--text)}
+
+/* Layout */
+.layout{display:grid;grid-template-columns:340px minmax(0,1fr);min-height:calc(100vh - 65px)}
+aside{
+  background:var(--bg-2);
+  border-right:1px solid var(--line);
+  padding:16px 14px 96px;
+  max-height:calc(100vh - 65px);
+  overflow:auto;
+  position:sticky;top:65px;
+}
+aside::-webkit-scrollbar,.terminal::-webkit-scrollbar{width:9px;height:9px}
+aside::-webkit-scrollbar-thumb,.terminal::-webkit-scrollbar-thumb{background:#223040;border-radius:6px}
+aside::-webkit-scrollbar-track,.terminal::-webkit-scrollbar-track{background:transparent}
+
+.side-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+.side-head strong{font-size:11px;text-transform:uppercase;letter-spacing:1.4px;color:var(--muted)}
+.count{font-family:'JetBrains Mono',Consolas,monospace;font-size:11px;color:var(--mint);background:#0d2a22;padding:3px 8px;border-radius:20px;border:1px solid #1a4d3c}
+#menuFilter{
+  width:100%;background:#0a121a;border:1px solid var(--line);
+  border-radius:var(--radius-sm);padding:9px 11px;margin-bottom:12px;font-size:13px;
+}
+#menuFilter::placeholder{color:var(--muted-2)}
+#menuFilter:focus{border-color:var(--mint);outline:none}
+
+.group{border-top:1px solid var(--line);margin-top:2px}
+.group:first-of-type{border-top:0}
+summary{cursor:pointer;padding:11px 6px;font-weight:600;list-style-position:inside;user-select:none;transition:color .12s}
+summary::marker{color:var(--mint-2)}
+summary:hover{color:var(--mint)}
+.group>summary{color:var(--mint);font-size:14px;display:flex;align-items:center;gap:8px}
+.group>summary::marker{color:var(--mint)}
+.sub{margin:2px 0 6px 10px;padding-left:8px;border-left:1px solid var(--line-2)}
+.sub>summary{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;padding:8px 4px;font-weight:600}
+.sub>summary:hover{color:var(--text)}
+
+.cmd{
+  display:block;width:100%;text-align:left;margin:2px 0;padding:8px 10px;
+  background:transparent;border:1px solid transparent;border-radius:6px;
+  transition:background .1s,border-color .1s;
+}
+.cmd:hover:enabled{background:#12202c;border-color:var(--line-2)}
+.cmd .name{display:block;font-family:'JetBrains Mono',Consolas,monospace;font-size:12.5px;color:#e3ecf6;font-weight:500}
+.cmd .wire{display:block;margin-top:2px;font-family:'JetBrains Mono',Consolas,monospace;font-size:10.5px;color:var(--muted-2);overflow-wrap:anywhere}
+.cmd .desc{display:block;margin-top:5px;font-size:11px;color:var(--muted);line-height:1.45}
+.cmd.attack .name{color:#ffb0bb}
+.cmd.param .name::after{content:' ⚙';color:var(--amber);font-size:11px}
+.cmd.param .wire::before{content:'▸ ';color:var(--amber)}
+.cmd[data-unavailable]{opacity:.55;border-left:2px solid #4a3b1f}
+
+.stop{
+  position:fixed;left:18px;bottom:16px;z-index:35;width:304px;
+  background:#2c1a22;color:#ffb4c0;border-color:#5a2d38;
+  padding:11px 14px;font-weight:600;box-shadow:var(--shadow);
+}
+.stop:hover:enabled{background:#3d2530;border-color:var(--red)}
+.stop:disabled{color:#8a5f6a}
+
+/* Main */
+main{padding:22px 26px;min-width:0;max-width:1500px;margin:0 auto;width:100%}
+.hero{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:18px}
+.hero h2{margin:2px 0 6px;font-size:22px;font-weight:700;letter-spacing:-.2px}
+.hero p{margin:0;color:var(--muted);font-size:13px;max-width:680px}
+.eyebrow{text-transform:uppercase;letter-spacing:1.6px;font-size:10px;color:var(--muted);font-weight:600}
+.badge{font-family:'JetBrains Mono',Consolas,monospace;font-size:11px;border:1px solid #2c556b;background:#0d1e28;color:var(--mint);padding:5px 10px;border-radius:20px}
+
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}
+.stat{
+  background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+  padding:12px 15px;box-shadow:var(--shadow);
+}
+.stat span{display:block;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1.2px;font-weight:600}
+.stat strong{display:block;margin-top:6px;font-size:15px;font-weight:600}
+
+.panel{
+  background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+  overflow:hidden;margin-bottom:16px;box-shadow:var(--shadow);
+}
+.bar{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:11px 15px;border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg,#131e2a,#0f1924);
+}
+.bar h3{margin:0;font-size:13px;font-weight:600;letter-spacing:.3px;display:flex;align-items:center;gap:8px}
+.tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.tools button{font-size:11.5px;padding:6px 10px}
+.tools label{font-size:11.5px;color:var(--muted);display:flex;align-items:center;gap:6px;cursor:pointer}
+
+.terminal{
+  height:400px;margin:0;padding:15px 17px;
+  background:#060a0f;color:#c8d8e8;
+  overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;
+  font-family:'JetBrains Mono',Consolas,monospace;font-size:12.5px;line-height:1.65;
+  border-bottom:1px solid var(--line);
+}
+.terminal .tx{color:var(--mint)}
+.terminal .sys{color:var(--muted)}
+.terminal .err{color:var(--red)}
+.terminal .rx{color:#a7c8ea}
+
+#cli{display:flex;gap:8px;align-items:center;padding:10px 12px;background:var(--panel-2)}
+.prompt{color:var(--mint);font-family:'JetBrains Mono',Consolas,monospace;font-size:14px;padding-left:4px}
+#command{flex:1;min-width:0;border:0;background:transparent;padding:8px 4px;font-size:13px;font-family:'JetBrains Mono',Consolas,monospace}
+#command::placeholder{color:var(--muted-2)}
+#command:focus{outline:none}
+select{background:#0a121a;border:1px solid var(--line);border-radius:6px;padding:7px 9px;font-size:12px}
+
+.editor{padding:0}
+.editor[hidden]{display:none}
+.editor-body{padding:15px}
+.editor p{font-size:12px;line-height:1.55;color:var(--muted);margin:0 0 12px}
+.editor-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.editor label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;font-weight:600}
+.editor input,.editor select,.editor textarea{
+  display:block;width:100%;margin-top:6px;background:#0a121a;
+  border:1px solid var(--line);border-radius:6px;padding:9px 11px;font-size:13px;
+  font-family:'JetBrains Mono',Consolas,monospace;
+}
+.editor textarea{resize:vertical;min-height:80px}
+.editor input:focus,.editor select:focus,.editor textarea:focus{border-color:var(--mint);outline:none}
+.preview{display:block;margin:10px 0;padding:10px 12px;background:#071410;border:1px solid #1c463a;border-radius:6px;color:var(--mint);font-family:'JetBrains Mono',Consolas,monospace;font-size:12.5px;overflow-wrap:anywhere}
+.error{color:var(--red);font-size:12px;margin:6px 0;min-height:16px}
+.editor-actions{display:flex;gap:8px;margin-top:10px}
+.settings-note{padding:15px;font-size:12.5px;line-height:1.65;color:var(--muted)}
+.settings-note code{background:#0a121a;border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--mint);font-size:12px}
+.notice{padding:11px 14px;border:1px solid #5a471f;background:#1d1810;border-radius:8px;color:#e8cb91;font-size:12.5px;margin-bottom:14px}
+#message{font-size:12.5px;color:var(--red);min-height:18px;margin:8px 0 0}
+
+@media(max-width:1000px){
+  .layout{grid-template-columns:280px minmax(0,1fr)}
+  .stop{width:244px}
+}
+@media(max-width:760px){
+  header{padding:10px 14px;flex-wrap:wrap}
+  .layout{display:block}
+  .connection{width:100%;justify-content:space-between}
+  aside{position:static;max-height:380px;border-right:0;border-bottom:1px solid var(--line);padding-bottom:14px}
+  .stop{left:10px;right:10px;width:calc(100% - 20px);bottom:10px}
+  .stats{grid-template-columns:1fr}
+  main{padding:15px}
+  .hero{flex-direction:column}
+  .terminal{height:330px}
+  #cli{flex-wrap:wrap}
+  .editor-grid{grid-template-columns:1fr}
+  body{padding-bottom:70px}
+}
 </style>
 </head>
 <body>
 <header>
- <div class="brand"><div class="logo">M</div><div><h1>MARAUDER</h1><small>v6.1 · Web Serial GUI</small></div></div>
- <div class="connection"><span id="status" class="status"><i class="dot"></i><span id="stateText">Desconectado</span></span><button id="connect" class="primary">Conectar USB</button></div>
+  <div class="brand">
+    <div class="logo">M</div>
+    <div>
+      <h1>MARAUDER</h1>
+      <small>v6.1 · Web Serial GUI</small>
+    </div>
+  </div>
+  <div class="connection">
+    <span id="status" class="status"><i class="dot"></i><span id="stateText">Desconectado</span></span>
+    <button id="connect" class="primary">Conectar USB</button>
+  </div>
 </header>
 <div class="layout">
-<aside>
- <div class="side-head"><strong>Menú del dispositivo</strong><span id="menuCount" class="count"></span></div>
- <input id="menuFilter" type="search" placeholder="Filtrar comandos…" autocomplete="off" aria-label="Filtrar comandos">
- <nav id="groups" aria-label="Comandos Marauder"></nav>
- <button id="stop" class="stop" disabled>■ Detener · stopscan</button>
-</aside>
-<main>
- <div class="hero"><div><span class="eyebrow">Consola USB</span><h2>Control del ESP32 Marauder</h2><span class="muted">Menú alineado con el dispositivo; el comando enviado se muestra debajo de cada opción.</span></div><span class="badge">Firmware objetivo v1.16.0</span></div>
- <div id="compat" class="notice" hidden></div>
- <div class="stats"><div class="stat"><span>Transporte</span><strong>Web Serial · 115200</strong></div><div class="stat"><span>RX</span><strong id="rx">0 B</strong></div><div class="stat"><span>Sesión</span><strong id="session">Sin conexión</strong></div></div>
- <section id="actionEditor" class="panel editor" hidden>
-  <div class="bar"><h3 id="actionTitle">Configurar comando</h3><button id="cancelAction">Cerrar</button></div>
-  <div><p id="actionHelp"></p><div id="actionFields" class="editor-grid"></div><code id="actionPreview" class="preview"></code><p id="actionError" class="error"></p><div class="editor-actions"><button id="runAction" class="primary">Enviar comando</button></div></div>
- </section>
- <section class="panel">
-  <div class="bar"><h3>⌘ Terminal CLI</h3><div class="tools"><label><input id="autoscroll" type="checkbox" checked> Autoscroll</label><button id="export">Exportar log</button><button id="clear">Limpiar</button></div></div>
-  <pre id="terminal" class="terminal" tabindex="0" aria-label="Salida serial"></pre>
-  <form id="cli"><span class="prompt">❯</span><input id="command" maxlength="512" autocomplete="off" spellcheck="false" placeholder="Escribe un comando…"><select id="eol"><option value="lf">LF</option><option value="crlf">CRLF</option></select><button id="send" class="primary" type="submit">Enviar ↵</button></form>
- </section>
- <section class="panel"><div class="bar"><h3>Device & Settings</h3></div><div class="settings-note">Los ajustes avanzados como <code>forcepmkid</code> o <code>chanhop</code> se gestionan desde la terminal. Usa <code>settings</code> para consultar la configuración disponible en tu compilación y <code>help</code> para verificar sintaxis.</div></section>
- <div id="message" class="error" role="alert"></div>
-</main>
+  <aside>
+    <div class="side-head">
+      <strong>Menú del dispositivo</strong>
+      <span id="menuCount" class="count"></span>
+    </div>
+    <input id="menuFilter" type="search" placeholder="Filtrar comandos…" autocomplete="off" aria-label="Filtrar comandos">
+    <nav id="groups" aria-label="Comandos Marauder"></nav>
+    <button id="stop" class="stop" disabled>■ Detener · stopscan</button>
+  </aside>
+  <main>
+    <div class="hero">
+      <div>
+        <span class="eyebrow">Consola USB</span>
+        <h2>Control del ESP32 Marauder</h2>
+        <p>Menú alineado con el firmware. El comando que se envía aparece debajo del nombre, y su descripción justo abajo.</p>
+      </div>
+      <span class="badge">Firmware v1.16.0</span>
+    </div>
+    <div id="compat" class="notice" hidden></div>
+    <div class="stats">
+      <div class="stat"><span>Transporte</span><strong>Web Serial · 115200</strong></div>
+      <div class="stat"><span>RX</span><strong id="rx">0 B</strong></div>
+      <div class="stat"><span>Sesión</span><strong id="session">Sin conexión</strong></div>
+    </div>
+    <section id="actionEditor" class="panel editor" hidden>
+      <div class="bar">
+        <h3 id="actionTitle">Configurar comando</h3>
+        <button id="cancelAction">Cerrar</button>
+      </div>
+      <div class="editor-body">
+        <p id="actionHelp"></p>
+        <div id="actionFields" class="editor-grid"></div>
+        <code id="actionPreview" class="preview"></code>
+        <p id="actionError" class="error"></p>
+        <div class="editor-actions"><button id="runAction" class="primary">Enviar comando</button></div>
+      </div>
+    </section>
+    <section class="panel">
+      <div class="bar">
+        <h3>🖥 Terminal CLI</h3>
+        <div class="tools">
+          <label><input id="autoscroll" type="checkbox" checked> Autoscroll</label>
+          <button id="export">Exportar log</button>
+          <button id="clear">Limpiar</button>
+        </div>
+      </div>
+      <pre id="terminal" class="terminal" tabindex="0" aria-label="Salida serial"></pre>
+      <form id="cli">
+        <span class="prompt">❯</span>
+        <input id="command" maxlength="512" autocomplete="off" spellcheck="false" placeholder="Escribe un comando… (help)">
+        <select id="eol" aria-label="Fin de línea"><option value="lf">LF</option><option value="crlf">CRLF</option></select>
+        <button id="send" class="primary" type="submit">Enviar ⏎</button>
+      </form>
+    </section>
+    <section class="panel">
+      <div class="bar"><h3>⚙ Device &amp; Settings</h3></div>
+      <div class="settings-note">
+        Los ajustes avanzados como <code>forcepmkid</code> o <code>chanhop</code> se gestionan desde la terminal.
+        Usa <code>settings</code> para consultar la configuración disponible en tu compilación
+        y <code>help</code> para verificar sintaxis.
+      </div>
+    </section>
+    <div id="message" role="alert"></div>
+  </main>
 </div>
 <script>
 'use strict';
-const $=id=>document.getElementById(id);
-const direct=(label,command=label,note='',risk=false)=>({label,command,note,risk});
-const field=(label,type='text',extra={})=>({label,type,...extra});
-const selectField=(label,options)=>({label,type:'select',options});
-const configured=(label,template,fields,build,note='',risk=false)=>({label,template,fields,build,note,risk});
-const idx=(label='Índice')=>field(label,'number',{min:0,max:65535});
-const MENU={
- WiFi:{
-  Sniffers:[direct('sniffprobe'),direct('sniffbeacon'),direct('sniffdeauth'),direct('packetcount'),direct('sniffpmkid'),direct('packetmonitor'),direct('channelanalyzer'),direct('channelsummary'),direct('sniffraw'),direct('pwnagotchi','sniffpwn','Alias CLI de v1.16.0.'),direct('pineapple')],
-  Scanners:[direct('pingscan'),direct('arpscan'),configured('portscan','portscan -a -t <índice>',[idx('Índice IP (list -i)')],v=>'portscan -a -t '+v[0],'Requiere una IP de la lista del dispositivo.'),direct('sshescan','portscan -s ssh','Alias CLI verificado en v1.16.0.'),direct('telnetscan','portscan -s telnet','Alias CLI v1.16.0.'),direct('smtpscan','portscan -s smtp','Alias CLI v1.16.0.'),direct('dnsscan','portscan -s dns','Alias CLI verificado en v1.16.0.'),direct('httpscan','portscan -s http','Alias CLI v1.16.0.'),direct('httpsscan','portscan -s https','Alias CLI v1.16.0.'),direct('rdpscan','portscan -s rdp','Alias CLI v1.16.0.')],
-  Attacks:[direct('evilportal','evilportal','',true),direct('deauth','attack -t deauth','Requiere objetivos seleccionados previamente.',true),direct('apclonespam','apclonespam','',true),direct('deauthtarget','deauthtarget','',true),configured('karma','karma -p <índice>',[idx('Índice SSID/probe')],v=>'karma -p '+v[0],'Consulta primero la lista correspondiente en el dispositivo.',true),direct('badmsg','attack -t badmsg','Alias CLI verificado en v1.16.0.',true),direct('badmsgtarget','badmsgtarget','',true),direct('assocsleep','assocsleep','',true),direct('assocsleeptarget','assocsleeptarget','',true),direct('saecommit','attack -t sae','Alias CLI verificado en v1.16.0.',true),direct('channelswitch','channelswitch','',true),direct('quiettime','quiettime','',true)],
-  General:[direct('clearstations'),direct('selecthtml'),configured('selectap','select -a <índice>',[idx('Índice AP')],v=>'select -a '+v[0],'Selecciona o deselecciona un AP.'),configured('viewap','viewap <índice>',[idx('Índice AP')],v=>'viewap '+v[0]),configured('selectstation','select -c <índice>',[idx('Índice estación')],v=>'select -c '+v[0],'Selecciona o deselecciona una estación.'),configured('join','join -a <índice> -p <contraseña>',[idx('Índice AP'),field('Contraseña','password')],v=>'join -a '+v[0]+' -p '+quote(v[1]),'La respuesta del firmware puede mostrar la contraseña; revisa el log antes de compartirlo.'),direct('joinsaved','join -s','Conecta una red guardada.'),direct('startap'),direct('hostapinfo'),configured('setmac','setmac / rand / clone',[selectField('Operación',[['randapmac','MAC AP aleatoria'],['randstamac','MAC estación aleatoria'],['cloneapmac','Clonar AP'],['clonestamac','Clonar estación']]),idx('Índice para clonar')],v=>{if(v[0]==='cloneapmac')return 'cloneapmac -a '+v[1];if(v[0]==='clonestamac')return 'clonestamac -s '+v[1];return v[0]},'La CLI oficial v1.16.0 usa operaciones rand/clone; no una asignación MAC arbitraria.'),direct('shutdown'),direct('loadwardrive'),direct('generatessids'),direct('selectprobessids'),direct('addssids'),direct('clearssids'),direct('clearaps')]
- },
- Bluetooth:{
-  Sniffers:[direct('sniffbt'),direct('sniffflipper'),configured('findmy','findmy -t <índice>',[idx('Índice FindMy/AirTag')],v=>'findmy -t '+v[0]),direct('findmymonitor'),direct('skimmer','sniffskim','Alias CLI de v1.16.0.'),direct('btanalyze'),direct('flock','sniffbt -t flock','Alias CLI de v1.16.0.'),direct('metadetect','sniffbt -t meta','Alias CLI de v1.16.0.'),direct('foxhunt')],
-  Attacks:[direct('sourapple','blespam -t sourapple','Alias CLI de v1.16.0.',true),direct('applejuice','blespam -t applejuice','Alias CLI de v1.16.0.',true),direct('swiftpair','blespam -t windows','Alias CLI de v1.16.0.',true),direct('samsungspam','blespam -t samsung','Alias CLI de v1.16.0.',true),direct('googlespam','blespam -t google','Alias CLI de v1.16.0.',true),direct('flipperspam','blespam -t flipper','Alias CLI de v1.16.0.',true),configured('blespam','blespam -t <tipo>',[selectField('Tipo',[['all','Todos'],['sourapple','SourApple'],['applejuice','AppleJuice'],['windows','Windows'],['samsung','Samsung'],['google','Google'],['flipper','Flipper']])],v=>'blespam -t '+v[0],'',true),configured('spoofairtag','spoofat -t <índice>',[idx('Índice AirTag')],v=>'spoofat -t '+v[0],'Alias CLI de v1.16.0.',true),configured('findmysound','findmy -t <índice>',[idx('Índice FindMy/AirTag')],v=>'findmy -t '+v[0],'Hace sonar el dispositivo seleccionado cuando la compilación lo admite.',true)]
- },
- GPS:[direct('gpsdata'),direct('nmea'),direct('tracker start','gpstracker -c start','Alias CLI de v1.16.0.'),direct('tracker stop','gpstracker -c stop','Alias CLI de v1.16.0.'),direct('gpspoi')],
- 'Device & Settings':[direct('info'),direct('reboot'),direct('ls /'),configured('brightness','brightness -s <0–9>',[field('Nivel','number',{min:0,max:9})],v=>'brightness -s '+v[0]),direct('settings')]
+
+/* ============================================================
+   Helpers de UI y utilidades
+   ============================================================ */
+const $ = id => document.getElementById(id);
+const quote = s => '"' + String(s).replace(/(["\\$`])/g, '\\$1') + '"';
+const quoteArgument = quote;
+
+/* Construye una entrada "directa": un botón que envía un comando
+   sin parámetros extra. */
+const direct = (label, command = label, note = '', risk = false) =>
+  ({ label, command, note, risk });
+
+/* Construye la descripción de un campo del editor de parámetros. */
+const field = (label, type = 'text', extra = {}) => ({ label, type, ...extra });
+const selectField = (label, options) => ({ label, type: 'select', options });
+const idx = (label = 'Índice') => field(label, 'number', { min: 0, max: 65535 });
+
+/* Construye una entrada "configurable": el botón abre el editor
+   para que el usuario rellene los campos. */
+const configured = (label, template, fields, build, note = '', risk = false) =>
+  ({ label, template, fields, build, note, risk });
+
+/* ============================================================
+   MENÚ — verificado contra la salida real de `help`
+   del firmware Marauder v1.16.0.
+   ============================================================ */
+const MENU = {
+  WiFi: {
+    'Inicio rápido': [
+      direct('recon wifi',   'recon wifi',   'Arranca el escaneo WiFi completo. Equivale a "Start WiFi" en la pantalla física.'),
+      direct('recon ble',    'recon ble',    'Arranca el escaneo Bluetooth. Equivale a "Start BLE" en la pantalla física.'),
+      direct('recon status', 'recon status', 'Muestra el estado actual del reconocimiento.'),
+      direct('recon stop',   'recon stop',   'Detiene cualquier reconocimiento en curso.'),
+      direct('scanall',      'scanall',      'Escaneo WiFi directo: APs + estaciones.'),
+      direct('wardrive',     'wardrive',     'Inicia wardriving con GPS. Requiere módulo GPS conectado.'),
+      direct('stopscan',     'stopscan',     'Detiene el escaneo activo (WiFi, BLE o sniffer).')
+    ],
+    Sniffers: [
+      direct('sniffbeacon',   'sniffbeacon',   'Captura beacons WiFi de todos los APs cercanos.'),
+      direct('sniffprobe',    'sniffprobe',    'Captura probe requests de dispositivos cercanos.'),
+      direct('sniffdeauth',   'sniffdeauth',   'Detecta tramas de desautenticación (posible ataque).'),
+      configured('sniffpmkid', 'sniffpmkid [-c <canal>] [-d] [-l]', [
+        { ...idx('Canal (opcional)'), optional: true },
+        selectField('Flags', [['', 'Ninguno'], ['-d', 'Solo deauth'], ['-l', 'Solo PMKID']])
+      ], v => 'sniffpmkid' + (v[0] ? ' -c ' + v[0] : '') + (v[1] ? ' ' + v[1] : ''),
+        'Requiere forcepmkid activo: settings -s forcepmkid enable.'),
+      direct('sniffraw',      'sniffraw',      'Volcado crudo de tramas WiFi (modo promiscuo).'),
+      direct('sniffpwn',      'sniffpwn',      'Modo Pwnagotchi: captura handshakes y PMKID automáticamente.'),
+      direct('sniffpinescan', 'sniffpinescan', 'Modo Pineapple: simula SSIDs conocidos para forzar handshakes.'),
+      direct('sniffmultissid','sniffmultissid','Sniffer multi-SSID.'),
+      direct('sniffsae',      'sniffsae',      'Captura tramas SAE (WPA3).'),
+      direct('packetcount',   'packetcount',   'Cuenta paquetes por tipo y canal. Ideal para análisis rápido.')
+    ],
+    Scanners: [
+      direct('pingscan',      'pingscan',      'Escaneo de red local por ICMP (requiere estar conectado a un AP).'),
+      configured('arpscan',   'arpscan [-f]',  [
+        selectField('Modo', [['', 'Normal'], ['-f', 'Forzado']])
+      ], v => 'arpscan' + (v[0] ? ' ' + v[0] : ''),
+        'Descubre hosts en la red local por ARP.'),
+      configured('portscan IP', 'portscan -a -t <índice>', [
+        idx('Índice IP (list -i)')
+      ], v => 'portscan -a -t ' + v[0],
+        'Escanea todos los puertos de una IP. Requiere estar conectado a un AP.'),
+      direct('portscan ssh',   'portscan -s ssh',    'Escaneo del puerto SSH en la red local.'),
+      direct('portscan telnet','portscan -s telnet', 'Escaneo del puerto Telnet.'),
+      direct('portscan smtp',  'portscan -s smtp',   'Escaneo del puerto SMTP.'),
+      direct('portscan dns',   'portscan -s dns',    'Escaneo del puerto DNS.'),
+      direct('portscan http',  'portscan -s http',   'Escaneo del puerto HTTP.'),
+      direct('portscan https', 'portscan -s https',  'Escaneo del puerto HTTPS.'),
+      direct('portscan rdp',   'portscan -s rdp',    'Escaneo del puerto RDP.')
+    ],
+    Attacks: [
+      configured('attack quiet',   'attack -t quiet', [
+        selectField('Modo', [['quiet','Quiet'],['csa','CSA'],['sae','SAE']])
+      ], v => 'attack -t ' + v[0], 'Ataques de canal. Verifica la sintaxis con help.', true),
+      configured('attack beacon',  'attack -t beacon [-l/-r/-a]', [
+        selectField('Origen', [['-r','Aleatorio'],['-l','Lista SSID'],['-a','Lista AP']])
+      ], v => 'attack -t beacon ' + v[0], 'Spam de beacons con SSIDs falsos.', true),
+      configured('attack deauth',  'attack -t deauth [-c] [-s <src>] [-d <dst>]', [
+        selectField('Modo', [['','Por lista'],['-c','Broadcast']])
+      ], v => 'attack -t deauth' + (v[0] ? ' ' + v[0] : ''),
+        'Requiere objetivos seleccionados previamente o modo broadcast.', true),
+      direct('attack probe',     'attack -t probe',     'Spam de probe requests con SSIDs conocidos.', true),
+      direct('attack rickroll',  'attack -t rickroll',  'Beacons con el SSID de Rick Astley. Clásico.', true),
+      configured('attack badmsg', 'attack -t badmsg [-c]', [
+        selectField('Modo', [['','Normal'],['-c','Continuo']])
+      ], v => 'attack -t badmsg' + (v[0] ? ' ' + v[0] : ''),
+        'Inyecta tramas malformadas. Usar con cuidado.', true),
+      configured('attack sleep',  'attack -t sleep [-c]', [
+        selectField('Modo', [['','Normal'],['-c','Continuo']])
+      ], v => 'attack -t sleep' + (v[0] ? ' ' + v[0] : ''),
+        'Ataque de asociación sleep para forzar reconexiones.', true),
+      configured('evilportal',    'evilportal -c start [-w html.html]', [
+        { ...field('Archivo HTML', 'text', { placeholder: 'ej: portal.html' }), optional: true }
+      ], v => 'evilportal -c start' + (v[0] ? ' -w ' + v[0] : ''),
+        'Levanta un portal cautivo. El HTML debe estar en la SD.', true),
+      configured('karma', 'karma -p <índice>', [
+        idx('Índice SSID/probe (list -p)')
+      ], v => 'karma -p ' + v[0],
+        'Responde a probe requests con SSIDs conocidos.', true)
+    ],
+    General: [
+      configured('clearlist', 'clearlist -a/-c/-s', [
+        selectField('Lista', [['-a','APs'],['-c','Estaciones'],['-s','SSIDs']])
+      ], v => 'clearlist ' + v[0], 'Borra listas internas del firmware.'),
+      configured('select', 'select -a/-s/-c <índice>', [
+        selectField('Lista', [['-a','AP'],['-s','SSID'],['-c','Estación']]),
+        idx('Índice (o varios separados por coma)')
+      ], v => 'select ' + v[0] + ' ' + v[1],
+        'Marca objetivos. Acepta varios índices separados por coma.'),
+      configured('info -a', 'info -a <índice>', [
+        idx('Índice AP (list -a)')
+      ], v => 'info -a ' + v[0], 'Info detallada de un AP concreto.'),
+      configured('join', 'join -a <índice> -p <contraseña>', [
+        idx('Índice AP (list -a)'),
+        field('Contraseña', 'password')
+      ], v => 'join -a ' + v[0] + ' -p ' + quote(v[1]),
+        'La respuesta del firmware puede mostrar la contraseña; revisa el log antes de compartirlo.'),
+      direct('join -s', 'join -s', 'Conecta a una red guardada previamente.'),
+      direct('randapmac',   'randapmac',   'MAC aleatoria para el AP.'),
+      direct('randstamac',  'randstamac',  'MAC aleatoria para la estación.'),
+      configured('cloneapmac', 'cloneapmac [-a <índice>]', [
+        { ...idx('Índice AP (opcional)'), optional: true }
+      ], v => 'cloneapmac' + (v[0] ? ' -a ' + v[0] : ''),
+        'Clona la MAC de un AP de la lista.'),
+      configured('clonestamac', 'clonestamac [-s <índice>]', [
+        { ...idx('Índice estación (opcional)'), optional: true }
+      ], v => 'clonestamac' + (v[0] ? ' -s ' + v[0] : ''),
+        'Clona la MAC de una estación de la lista.'),
+      configured('add AP', 'add -a -b <mac> [-ch <canal>] [-e <ssid>]', [
+        field('MAC', 'text', { placeholder: 'AA:BB:CC:DD:EE:FF' }),
+        { ...idx('Canal (opcional)'), optional: true },
+        { ...field('SSID (opcional)'), optional: true }
+      ], v => 'add -a -b ' + v[0] + (v[1] ? ' -ch ' + v[1] : '') + (v[2] ? ' -e ' + v[2] : ''),
+        'Añade un AP manual a la lista.'),
+      configured('add estación', 'add -c -b <mac> -ap <ap_index>', [
+        field('MAC estación', 'text', { placeholder: 'AA:BB:CC:DD:EE:FF' }),
+        idx('Índice AP')
+      ], v => 'add -c -b ' + v[0] + ' -ap ' + v[1],
+        'Añade manualmente una estación a un AP.'),
+      configured('ssid -a', 'ssid -a [-g <count>/-n <name>]', [
+        { ...idx('Cantidad (opcional)'), optional: true },
+        { ...field('Nombre base (opcional)'), optional: true }
+      ], v => 'ssid -a' + (v[0] ? ' -g ' + v[0] : '') + (v[1] ? ' -n ' + v[1] : ''),
+        'Genera SSIDs aleatorios.'),
+      configured('ssid -r', 'ssid -r <índice>', [
+        idx('Índice SSID')
+      ], v => 'ssid -r ' + v[0], 'Borra un SSID de la lista.'),
+      configured('save', 'save -a/-s', [
+        selectField('Guardar', [['-a','APs'],['-s','SSIDs']])
+      ], v => 'save ' + v[0], 'Guarda la lista actual en SPIFFS.'),
+      configured('load', 'load -a/-s', [
+        selectField('Cargar', [['-a','APs'],['-s','SSIDs']])
+      ], v => 'load ' + v[0], 'Carga la lista guardada en SPIFFS.'),
+      configured('channel', 'channel -s <canal>', [
+        idx('Canal (1-14)')
+      ], v => 'channel -s ' + v[0], 'Cambia el canal WiFi activo.'),
+      configured('settings', 'settings -s <setting> enable/disable', [
+        field('Ajuste', 'text', { placeholder: 'ej: forcepmkid' }),
+        selectField('Estado', [['enable','Enable'],['disable','Disable']])
+      ], v => 'settings -s ' + v[0] + ' ' + v[1],
+        'Cambia ajustes internos del firmware.'),
+      direct('settings -r', 'settings -r', 'Reinicia la configuración a valores por defecto.'),
+      direct('mactrack',    'mactrack',    'Sigue una MAC concreta a través de los canales.'),
+      configured('led', 'led -s <hex>/-p <rainbow>', [
+        selectField('Modo', [['-p','Rainbow'],['-s','Color fijo']]),
+        { ...field('Color hex (si aplica)', 'text', { placeholder: 'FF00AA' }), optional: true }
+      ], v => v[0] === '-p' ? 'led -p' : 'led -s ' + v[1],
+        'Controla el LED RGB del dispositivo.')
+    ],
+    Listas: [
+      direct('list -a', 'list -a', 'Lista de APs detectados.'),
+      direct('list -c', 'list -c', 'Lista de estaciones (clientes) detectadas.'),
+      direct('list -i', 'list -i', 'Lista de IPs descubiertas en la red.'),
+      direct('list -p', 'list -p', 'Lista de SSIDs de probe requests capturados.'),
+      direct('list -s', 'list -s', 'Lista de SSIDs guardados.'),
+      direct('list -t', 'list -t', 'Lista de estaciones por tipo.'),
+      direct('list -b', 'list -b', 'Lista de dispositivos Bluetooth detectados.'),
+      direct('list -f', 'list -f', 'Lista de dispositivos Flipper detectados.'),
+      direct('list -x', 'list -x', 'Lista extendida.'),
+      direct('list -m', 'list -m', 'Lista de dispositivos multi-SSID.')
+    ]
+  },
+  Bluetooth: {
+    Sniffers: [
+      direct('sniffbt',           'sniffbt',            'Escaneo Bluetooth clásico.'),
+      direct('sniffbt airtag',    'sniffbt -t airtag',  'Detecta AirTags cercanos.'),
+      direct('sniffbt flipper',   'sniffbt -t flipper', 'Detecta Flippers Zero cercanos.'),
+      direct('sniffbt flock',     'sniffbt -t flock',   'Detecta cámaras Flock.'),
+      direct('sniffbt meta',      'sniffbt -t meta',    'Detecta dispositivos Meta (Ray-Ban).'),
+      direct('sniffskim',         'sniffskim',          'Detecta skimmers Bluetooth en cajeros.'),
+      configured('findmy',        'findmy -t <índice>', [
+        idx('Índice FindMy/AirTag')
+      ], v => 'findmy -t ' + v[0], 'Rastrea un AirTag/FindMy detectado.'),
+      configured('foxhunt', 'foxhunt -w/-s/-b/-t/-f/-p/-m', [
+        selectField('Modo', [
+          ['-b','Bluetooth'],
+          ['-t','FindMy'],
+          ['-f','Flipper'],
+          ['-p','Pineapple'],
+          ['-m','Multi-SSID'],
+          ['-w','AP WiFi (requiere argumento)'],
+          ['-s','Estación WiFi (requiere 2 argumentos)']
+        ])
+      ], v => 'foxhunt ' + v[0], 'Búsqueda dirigida de un dispositivo concreto.')
+    ],
+    Attacks: [
+      configured('blespam', 'blespam -t <tipo>', [
+        selectField('Tipo', [
+          ['all','Todos'],
+          ['sourapple','SourApple'],
+          ['applejuice','AppleJuice'],
+          ['google','Google'],
+          ['samsung','Samsung'],
+          ['windows','Windows (SwiftPair)'],
+          ['flipper','Flipper']
+        ])
+      ], v => 'blespam -t ' + v[0],
+        'Spam de emparejamiento Bluetooth. Se detiene con stopscan.', true),
+      configured('spoofat', 'spoofat -t <índice>', [
+        idx('Índice AirTag')
+      ], v => 'spoofat -t ' + v[0],
+        'Suplanta un AirTag detectado.', true)
+    ]
+  },
+  GPS: [
+    direct('gpsdata',  'gpsdata',  'Lectura puntual del GPS en formato texto.'),
+    direct('nmea',     'nmea',     'Stream NMEA continuo hasta stopscan.'),
+    configured('gps', 'gps [-t] [-g] <tipo>', [
+      selectField('Tipo', [
+        ['fix','Fix'],
+        ['sat','Satélites'],
+        ['lon','Longitud'],
+        ['lat','Latitud'],
+        ['alt','Altitud'],
+        ['date','Fecha'],
+        ['accuracy','Precisión'],
+        ['text','Texto'],
+        ['nmea','NMEA']
+      ])
+    ], v => 'gps ' + v[0], 'Consulta puntual de un dato GPS concreto.'),
+    configured('gpstracker', 'gpstracker -c <start/stop>', [
+      selectField('Acción', [['start','Iniciar'],['stop','Detener']])
+    ], v => 'gpstracker -c ' + v[0],
+      'Wardriving continuo: guarda cada AP con coordenadas GPS.'),
+    configured('gpspoi', 'gpspoi -s/-m/-e', [
+      selectField('Acción', [['-s','Start'],['-m','Mark'],['-e','End']])
+    ], v => 'gpspoi ' + v[0], 'Marca puntos de interés durante el wardriving.'),
+    direct('wardrive',    'wardrive',    'Inicia wardriving con el GPS conectado.'),
+    configured('wardrivepoi', 'wardrivepoi [label]', [
+      { ...field('Etiqueta del POI (opcional)'), optional: true }
+    ], v => 'wardrivepoi' + (v[0] ? ' ' + v[0] : ''),
+      'Añade un punto de interés durante el wardriving.')
+  ],
+  'Device & Settings': [
+    direct('info',       'info',       'Muestra versión del firmware y configuración general.'),
+    direct('protocolinfo', 'protocolinfo', 'Información del protocolo de comunicación con la GUI.'),
+    direct('reboot',     'reboot',     'Reinicia el ESP32.'),
+    configured('ls', 'ls <directorio>', [
+      { ...field('Directorio', 'text', { placeholder: '/' }), optional: true }
+    ], v => 'ls ' + (v[0] || '/'), 'Lista archivos de la SD o SPIFFS.'),
+    configured('brightness', 'brightness [-c cycle] [-s <0-9>]', [
+      selectField('Modo', [['-s','Nivel fijo'],['-c','Ciclo automático']]),
+      { ...idx('Nivel (0-9, solo si fijo)'), optional: true }
+    ], v => v[0] === '-c' ? 'brightness -c cycle' : 'brightness -s ' + v[1],
+      'Controla el brillo de la pantalla TFT.'),
+    direct('update',     'update -s/-w', 'Actualiza el firmware. No usar sin leer la wiki.', true),
+    direct('backupspiffs', 'backupspiffs',  'Copia SPIFFS a /spiffs en la SD.'),
+    direct('backupstatus','backupstatus', 'Inspecciona /spiffs en la SD.'),
+    direct('restorespiffs','restorespiffs','Restaura SPIFFS desde la SD.'),
+    configured('channel', 'channel -s <canal>', [
+      idx('Canal (1-14)')
+    ], v => 'channel -s ' + v[0], 'Cambia el canal WiFi activo.'),
+    configured('settings', 'settings -s <ajuste> enable/disable', [
+      field('Ajuste', 'text', { placeholder: 'ej: forcepmkid' }),
+      selectField('Estado', [['enable','Enable'],['disable','Disable']])
+    ], v => 'settings -s ' + v[0] + ' ' + v[1], 'Activa/desactiva un ajuste interno.'),
+    direct('settings -r', 'settings -r', 'Resetea toda la configuración a valores por defecto.'),
+    direct('help',       'help',       'Lista todos los comandos soportados por el firmware.')
+  ]
 };
-let port=null,reader=null,writer=null,reading=false,closing=false,rxBytes=0,started=0,currentAction=null,history=[],historyPos=0;
-const decoder=new TextDecoder('utf-8');
-function quote(value){const s=String(value??'');return /[\s"\\]/.test(s)?'"'+s.replace(/(["\\])/g,'\\$1')+'"':s}
-function setStatus(online,text){$('status').classList.toggle('online',online);$('stateText').textContent=text;$('connect').textContent=online?'Desconectar':'Conectar USB';$('stop').disabled=!online;$('send').disabled=!online;$('command').disabled=!online;document.querySelectorAll('.cmd').forEach(b=>b.disabled=!online)}
-function addTerminal(text,kind=''){const span=document.createElement('span');if(kind)span.className=kind;span.textContent=text;$('terminal').append(span);if($('autoscroll').checked)$('terminal').scrollTop=$('terminal').scrollHeight}
-function refreshStats(){$('rx').textContent=rxBytes<1024?rxBytes+' B':(rxBytes/1024).toFixed(1)+' KiB';$('session').textContent=started?Math.floor((Date.now()-started)/1000)+' s':'Sin conexión'}
-setInterval(refreshStats,1000);
-function renderMenu(filter=''){const nav=$('groups');nav.textContent='';const q=filter.trim().toLowerCase();let visible=0;for(const [groupName,group] of Object.entries(MENU)){const groupDetails=document.createElement('details');groupDetails.className='group';const groupSummary=document.createElement('summary');groupSummary.textContent=groupName;groupDetails.append(groupSummary);const sections=Array.isArray(group)?{'':group}:group;let groupVisible=0;for(const [sectionName,actions] of Object.entries(sections)){const matches=actions.filter(a=>(groupName+' '+sectionName+' '+a.label+' '+(a.command||a.template||'')).toLowerCase().includes(q));if(!matches.length)continue;const holder=sectionName?document.createElement('details'):document.createElement('div');holder.className='sub';if(sectionName){const s=document.createElement('summary');s.textContent=sectionName;holder.append(s)}for(const action of matches){const b=document.createElement('button');b.type='button';b.className='cmd'+(action.risk?' attack':'')+(action.fields?' param':'');b.disabled=!port;b.dataset.label=action.label;const n=document.createElement('span');n.className='name';n.textContent=action.label;const w=document.createElement('span');w.className='wire';w.textContent=action.fields?(action.template||'configurable'):(action.command||action.label);b.append(n,w);if(action.note)b.title=action.note;b.addEventListener('click',()=>handleAction(action));holder.append(b);visible++;groupVisible++}groupDetails.append(holder)}if(groupVisible){if(q)groupDetails.open=true;nav.append(groupDetails)}}$('menuCount').textContent=visible+' comandos'}
-function validateCommand(cmd){if(typeof cmd!=='string'||!cmd.trim())throw new Error('Comando vacío.');if(/[\r\n\0-\x08\x0b\x0c\x0e-\x1f\x7f]/.test(cmd))throw new Error('El comando debe ocupar una sola línea.');return cmd.trim()}
-async function sendCommand(raw,{risk=false,label=''}={}){if(!port||!writer)throw new Error('Conecta el dispositivo primero.');const cmd=validateCommand(raw);if(risk&&!confirm('Vas a ejecutar “'+label+'”. Úsalo sólo en equipos y redes propios o autorizados. ¿Continuar?'))return;const eol=$('eol').value==='crlf'?'\r\n':'\n';await writer.write(new TextEncoder().encode(cmd+eol));addTerminal('> '+cmd+'\n','tx')}
-function handleAction(action){$('message').textContent='';if(action.fields){openEditor(action);return}sendCommand(action.command||action.label,{risk:action.risk,label:action.label}).catch(showError)}
-function openEditor(action){currentAction=action;$('actionEditor').hidden=false;$('actionTitle').textContent=action.label;$('actionHelp').textContent=action.note||'Completa los parámetros antes de enviar.';$('actionFields').textContent='';for(const f of action.fields){const label=document.createElement('label');label.textContent=f.label;let input;if(f.type==='select'){input=document.createElement('select');for(const [value,text] of f.options){const o=document.createElement('option');o.value=value;o.textContent=text;input.append(o)}}else{input=document.createElement('input');input.type=f.type||'text';if(f.min!==undefined)input.min=f.min;if(f.max!==undefined)input.max=f.max}input.addEventListener('input',updatePreview);input.addEventListener('change',updatePreview);label.append(input);$('actionFields').append(label)}updatePreview();$('actionEditor').scrollIntoView({behavior:'smooth',block:'nearest'})}
-function fieldValues(){return [...$('actionFields').querySelectorAll('input,select')].map(el=>el.value)}
-function buildCurrent(){if(!currentAction)return'';const values=fieldValues();for(let i=0;i<currentAction.fields.length;i++){const f=currentAction.fields[i],v=values[i];if(v==='')throw new Error('Completa “'+f.label+'”.');if(f.type==='number'){const n=Number(v);if(!Number.isInteger(n))throw new Error('“'+f.label+'” debe ser un entero.');if(f.min!==undefined&&n<f.min)throw new Error('“'+f.label+'” debe ser ≥ '+f.min+'.');if(f.max!==undefined&&n>f.max)throw new Error('“'+f.label+'” debe ser ≤ '+f.max+'.')}}return validateCommand(currentAction.build(values))}
-function updatePreview(){try{$('actionPreview').textContent=buildCurrent();$('actionError').textContent=''}catch(e){$('actionPreview').textContent=currentAction?.template||'';$('actionError').textContent=e.message}}
-function closeEditor(){currentAction=null;$('actionEditor').hidden=true;$('actionFields').textContent='';$('actionError').textContent=''}
-function showError(e){$('message').textContent=e?.message||String(e);addTerminal('[!] '+(e?.message||e)+'\n','err')}
-async function readLoop(){reading=true;try{reader=port.readable.getReader();while(reading){const {value,done}=await reader.read();if(done)break;if(value){rxBytes+=value.byteLength;addTerminal(decoder.decode(value,{stream:true}))}}}catch(e){if(reading)showError(e)}finally{try{reader?.releaseLock()}catch{}reader=null;if(reading&&port)await disconnect(false)}}
-async function connect(){if(!('serial'in navigator))throw new Error('Web Serial no está disponible. Usa Chrome/Edge de escritorio y HTTPS o localhost.');port=await navigator.serial.requestPort();await port.open({baudRate:115200,dataBits:8,stopBits:1,parity:'none',flowControl:'none'});writer=port.writable.getWriter();rxBytes=0;started=Date.now();setStatus(true,'Conectado');addTerminal('[+] Conectado a 115200 baudios.\n','sys');renderMenu($('menuFilter').value);readLoop()}
-async function disconnect(user=true){if(closing)return;closing=true;reading=false;try{try{await reader?.cancel()}catch{}try{writer?.releaseLock()}catch{}writer=null;try{await port?.close()}catch{}port=null;started=0;setStatus(false,'Desconectado');renderMenu($('menuFilter').value);if(user)addTerminal('[i] Puerto liberado.\n','sys')}finally{closing=false}}
-$('connect').addEventListener('click',()=>{(port?disconnect():connect()).catch(showError)});$('stop').addEventListener('click',()=>sendCommand('stopscan').catch(showError));
-$('cli').addEventListener('submit',e=>{e.preventDefault();const cmd=$('command').value.trim();if(!cmd)return;history.push(cmd);historyPos=history.length;sendCommand(cmd).then(()=>{$('command').value=''}).catch(showError)});
-$('command').addEventListener('keydown',e=>{if(e.key==='ArrowUp'){e.preventDefault();if(historyPos>0)historyPos--;$('command').value=history[historyPos]||''}else if(e.key==='ArrowDown'){e.preventDefault();if(historyPos<history.length)historyPos++;$('command').value=history[historyPos]||''}});
-$('menuFilter').addEventListener('input',e=>renderMenu(e.target.value));$('cancelAction').addEventListener('click',closeEditor);
-$('runAction').addEventListener('click',()=>{try{const cmd=buildCurrent();const a=currentAction;sendCommand(cmd,{risk:a.risk,label:a.label}).then(()=>closeEditor()).catch(showError)}catch(e){$('actionError').textContent=e.message}});
-$('clear').addEventListener('click',()=>{$('terminal').textContent=''});
-$('export').addEventListener('click',()=>{const blob=new Blob([$('terminal').innerText],{type:'text/plain;charset=utf-8'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='marauder_'+new Date().toISOString().replace(/[:.]/g,'-')+'.log';a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)});
-window.addEventListener('beforeunload',()=>{try{reader?.cancel()}catch{}});setStatus(false,'Desconectado');renderMenu();addTerminal('La salida del equipo aparecerá aquí.\n','sys');
+</script>
+<script>
+'use strict';
+
+/* ============================================================
+   Estado global
+   ============================================================ */
+let port = null;
+let reader = null;
+let writer = null;
+let reading = false;
+let closing = false;
+let rxBytes = 0;
+let started = 0;
+let currentAction = null;
+const history = [];
+let historyPos = 0;
+const decoder = new TextDecoder('utf-8', { fatal: false });
+
+/* ============================================================
+   Terminal y estadísticas
+   ============================================================ */
+function addTerminal(text, kind = '') {
+  const span = document.createElement('span');
+  if (kind) span.className = kind;
+  span.textContent = text;
+  const t = $('terminal');
+  t.append(span);
+  if ($('autoscroll').checked) t.scrollTop = t.scrollHeight;
+}
+
+function refreshStats() {
+  $('rx').textContent = rxBytes < 1024
+    ? rxBytes + ' B'
+    : (rxBytes / 1024).toFixed(1) + ' KiB';
+  $('session').textContent = started
+    ? Math.floor((Date.now() - started) / 1000) + ' s'
+    : 'Sin conexión';
+}
+setInterval(refreshStats, 1000);
+
+/* ============================================================
+   Estado de conexión
+   ============================================================ */
+function setStatus(online, text) {
+  $('status').classList.toggle('online', online);
+  $('stateText').textContent = text;
+  $('connect').textContent = online ? 'Desconectar' : 'Conectar USB';
+  $('stop').disabled = !online;
+  $('send').disabled = !online;
+  $('command').disabled = !online;
+  document.querySelectorAll('.cmd').forEach(b => b.disabled = !online);
+}
+
+/* ============================================================
+   Render del menú
+   ============================================================ */
+function renderMenu(filter = '') {
+  const nav = $('groups');
+  nav.textContent = '';
+  const q = filter.trim().toLowerCase();
+  let visible = 0;
+
+  for (const [groupName, group] of Object.entries(MENU)) {
+    const groupDetails = document.createElement('details');
+    groupDetails.className = 'group';
+    const groupSummary = document.createElement('summary');
+    groupSummary.textContent = groupName;
+    groupDetails.append(groupSummary);
+
+    const sections = Array.isArray(group) ? { '': group } : group;
+    let groupVisible = 0;
+
+    for (const [sectionName, actions] of Object.entries(sections)) {
+      const matches = actions.filter(a =>
+        (groupName + ' ' + sectionName + ' ' + a.label + ' ' +
+         (a.command || a.template || '') + ' ' + (a.note || ''))
+        .toLowerCase().includes(q)
+      );
+      if (!matches.length) continue;
+
+      const holder = sectionName ? document.createElement('details') : document.createElement('div');
+      holder.className = 'sub';
+      if (sectionName) {
+        const s = document.createElement('summary');
+        s.textContent = sectionName;
+        holder.append(s);
+      }
+
+      for (const action of matches) {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'cmd'
+          + (action.risk ? ' attack' : '')
+          + (action.fields ? ' param' : '');
+        b.disabled = !port;
+        b.dataset.label = action.label;
+        if (action.note) b.title = action.note;
+
+        const n = document.createElement('span');
+        n.className = 'name';
+        n.textContent = action.label;
+
+        const w = document.createElement('span');
+        w.className = 'wire';
+        w.textContent = action.fields
+          ? (action.template || 'configurable')
+          : (action.command || action.label);
+
+        b.append(n, w);
+
+        if (action.note) {
+          const d = document.createElement('span');
+          d.className = 'desc';
+          d.textContent = action.note;
+          b.append(d);
+        }
+
+        b.addEventListener('click', () => handleAction(action));
+        holder.append(b);
+        visible++;
+        groupVisible++;
+      }
+      groupDetails.append(holder);
+    }
+    if (groupVisible) {
+      if (q) groupDetails.open = true;
+      nav.append(groupDetails);
+    }
+  }
+  $('menuCount').textContent = visible + ' comandos';
+}
+
+/* ============================================================
+   Envío de comandos
+   ============================================================ */
+async function sendCommand(cmd, opts = {}) {
+  if (!port || !writer) throw new Error('No hay dispositivo conectado.');
+  if (!cmd || !cmd.trim()) return;
+  const eol = $('eol').value === 'crlf' ? '\r\n' : '\n';
+  const payload = cmd + eol;
+  addTerminal('❯ ' + cmd + '\n', 'tx');
+  await writer.write(new TextEncoder().encode(payload));
+}
+
+/* ============================================================
+   Manejo de acciones del menú
+   ============================================================ */
+function handleAction(action) {
+  $('message').textContent = '';
+  if (action.fields) { openEditor(action); return; }
+  sendCommand(action.command || action.label, {
+    risk: action.risk, label: action.label
+  }).catch(showError);
+}
+
+/* ============================================================
+   Editor de parámetros
+   ============================================================ */
+function openEditor(action) {
+  currentAction = action;
+  $('actionEditor').hidden = false;
+  $('actionTitle').textContent = action.label;
+  $('actionHelp').textContent = action.note || 'Completa los parámetros antes de enviar.';
+  $('actionFields').textContent = '';
+
+  for (const f of action.fields) {
+    const label = document.createElement('label');
+    label.textContent = f.label;
+    let input;
+
+    if (f.type === 'select') {
+      input = document.createElement('select');
+      for (const [value, text] of f.options) {
+        const o = document.createElement('option');
+        o.value = value;
+        o.textContent = text;
+        input.append(o);
+      }
+    } else if (f.type === 'textarea') {
+      input = document.createElement('textarea');
+      input.rows = f.rows || 4;
+      if (f.placeholder) input.placeholder = f.placeholder;
+    } else {
+      input = document.createElement('input');
+      input.type = f.type || 'text';
+      if (f.min !== undefined) input.min = f.min;
+      if (f.max !== undefined) input.max = f.max;
+      if (f.placeholder) input.placeholder = f.placeholder;
+    }
+    input.dataset.optional = f.optional ? '1' : '';
+    input.addEventListener('input', updatePreview);
+    input.addEventListener('change', updatePreview);
+    label.append(input);
+    $('actionFields').append(label);
+  }
+  updatePreview();
+  $('actionEditor').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function fieldValues() {
+  return [...$('actionFields').querySelectorAll('input,select,textarea')]
+    .map(el => el.value);
+}
+
+function buildCurrent() {
+  if (!currentAction) return '';
+  const values = fieldValues();
+  for (let i = 0; i < currentAction.fields.length; i++) {
+    const f = currentAction.fields[i];
+    const v = values[i];
+    if (v === '' && !f.optional) {
+      throw new Error('Completa "' + f.label + '".');
+    }
+    if (v !== '' && f.type === 'number') {
+      const n = Number(v);
+      if (!Number.isInteger(n)) throw new Error('"' + f.label + '" debe ser un entero.');
+      if (f.min !== undefined && n < f.min) throw new Error('"' + f.label + '" debe ser ≥ ' + f.min + '.');
+      if (f.max !== undefined && n > f.max) throw new Error('"' + f.label + '" debe ser ≤ ' + f.max + '.');
+    }
+  }
+  return validateCommand(currentAction.build(values));
+}
+
+function updatePreview() {
+  try {
+    $('actionPreview').textContent = buildCurrent();
+    $('actionError').textContent = '';
+  } catch (e) {
+    $('actionPreview').textContent = currentAction?.template || '';
+    $('actionError').textContent = e.message;
+  }
+}
+
+function closeEditor() {
+  currentAction = null;
+  $('actionEditor').hidden = true;
+  $('actionFields').textContent = '';
+  $('actionError').textContent = '';
+}
+
+/* ============================================================
+   Validación final del comando
+   ============================================================ */
+function validateCommand(cmd) {
+  if (typeof cmd !== 'string' || !cmd.trim()) throw new Error('Comando vacío.');
+  if (cmd.length > 512) throw new Error('Comando demasiado largo (máx 512).');
+  if (/[\r\n]/.test(cmd)) throw new Error('El comando no puede contener saltos de línea.');
+  return cmd.trim();
+}
+
+/* ============================================================
+   Manejo de errores
+   ============================================================ */
+function showError(e) {
+  const msg = e?.message || String(e);
+  $('message').textContent = msg;
+  addTerminal('[!] ' + msg + '\n', 'err');
+}
+
+/* ============================================================
+   Lectura del puerto serie
+   ============================================================ */
+async function readLoop() {
+  reading = true;
+  try {
+    reader = port.readable.getReader();
+    while (reading) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      if (value) {
+        rxBytes += value.byteLength;
+        addTerminal(decoder.decode(value, { stream: true }), 'rx');
+      }
+    }
+  } catch (e) {
+    if (reading) showError(e);
+  } finally {
+    try { reader?.releaseLock(); } catch {}
+    reader = null;
+    if (reading && port) await disconnect(false);
+  }
+}
+
+/* ============================================================
+   Conexión / desconexión
+   ============================================================ */
+async function connect() {
+  if (!('serial' in navigator)) {
+    throw new Error('Web Serial no está disponible. Usa Chrome/Edge de escritorio y HTTPS o localhost.');
+  }
+  port = await navigator.serial.requestPort();
+  await port.open({
+    baudRate: 115200, dataBits: 8, stopBits: 1,
+    parity: 'none', flowControl: 'none'
+  });
+  writer = port.writable.getWriter();
+  rxBytes = 0;
+  started = Date.now();
+  setStatus(true, 'Conectado');
+  addTerminal('[+] Conectado a 115200 baudios.\n', 'sys');
+  renderMenu($('menuFilter').value);
+  readLoop();
+}
+
+async function disconnect(user = true) {
+  if (closing) return;
+  closing = true;
+  reading = false;
+  try {
+    try { await reader?.cancel(); } catch {}
+    try { writer?.releaseLock(); } catch {}
+    writer = null;
+    try { await port?.close(); } catch {}
+    port = null;
+    started = 0;
+    setStatus(false, 'Desconectado');
+    renderMenu($('menuFilter').value);
+    if (user) addTerminal('[i] Puerto liberado.\n', 'sys');
+  } finally {
+    closing = false;
+  }
+}
+
+/* ============================================================
+   Event listeners
+   ============================================================ */
+$('connect').addEventListener('click', () => {
+  (port ? disconnect() : connect()).catch(showError);
+});
+
+$('stop').addEventListener('click', () => {
+  sendCommand('stopscan').catch(showError);
+});
+
+$('cli').addEventListener('submit', e => {
+  e.preventDefault();
+  const cmd = $('command').value.trim();
+  if (!cmd) return;
+  history.push(cmd);
+  historyPos = history.length;
+  sendCommand(cmd)
+    .then(() => { $('command').value = ''; })
+    .catch(showError);
+});
+
+$('command').addEventListener('keydown', e => {
+  if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    if (historyPos > 0) historyPos--;
+    $('command').value = history[historyPos] || '';
+  } else if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    if (historyPos < history.length) historyPos++;
+    $('command').value = history[historyPos] || '';
+  }
+});
+
+$('menuFilter').addEventListener('input', e => renderMenu(e.target.value));
+$('cancelAction').addEventListener('click', closeEditor);
+
+$('runAction').addEventListener('click', () => {
+  try {
+    const cmd = buildCurrent();
+    const a = currentAction;
+    sendCommand(cmd, { risk: a.risk, label: a.label })
+      .then(() => closeEditor())
+      .catch(showError);
+  } catch (e) {
+    $('actionError').textContent = e.message;
+  }
+});
+
+$('clear').addEventListener('click', () => {
+  $('terminal').textContent = '';
+});
+
+$('export').addEventListener('click', () => {
+  const blob = new Blob([$('terminal').innerText], { type: 'text/plain;charset=utf-8' });
+  const u = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = u;
+  a.download = 'marauder_' + new Date().toISOString().replace(/[:.]/g, '-') + '.log';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(u), 1000);
+});
+
+window.addEventListener('beforeunload', () => {
+  try { reader?.cancel(); } catch {}
+});
+
+setStatus(false, 'Desconectado');
+renderMenu();
+addTerminal('La salida del equipo aparecerá aquí.\n', 'sys');
 </script>
 </body>
 </html>
