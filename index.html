@@ -568,10 +568,12 @@ const MENU = {
     ], v => 'ls ' + (v[0] || '/'), 'Lista archivos de la SD o SPIFFS.'),
     configured('brightness', 'brightness [-c cycle] [-s <0-9>]', [
       selectField('Modo', [['-s','Nivel fijo'],['-c','Ciclo automático']]),
-      { ...idx('Nivel (0-9, solo si fijo)'), optional: true }
+      { ...field('Nivel (0-9)', 'number', { min: 0, max: 9 }), optional: true }
     ], v => v[0] === '-c' ? 'brightness -c cycle' : 'brightness -s ' + v[1],
       'Controla el brillo de la pantalla TFT.'),
-    direct('update',     'update -s/-w', 'Actualiza el firmware. No usar sin leer la wiki.', true),
+    configured('update', 'update -s/-w', [
+  selectField('Origen', [['-s','Desde SD'],['-w','Desde web (OTA)']])
+], v => 'update ' + v[0], 'Actualiza el firmware. No usar sin leer la wiki.', true),
     direct('backupspiffs', 'backupspiffs',  'Copia SPIFFS a /spiffs en la SD.'),
     direct('backupstatus','backupstatus', 'Inspecciona /spiffs en la SD.'),
     direct('restorespiffs','restorespiffs','Restaura SPIFFS desde la SD.'),
@@ -923,13 +925,16 @@ $('stop').addEventListener('click', () => {
 
 $('cli').addEventListener('submit', e => {
   e.preventDefault();
-  const cmd = $('command').value.trim();
-  if (!cmd) return;
-  history.push(cmd);
-  historyPos = history.length;
-  sendCommand(cmd)
-    .then(() => { $('command').value = ''; })
-    .catch(showError);
+  try {
+    const cmd = validateCommand($('command').value);
+    history.push(cmd);
+    historyPos = history.length;
+    sendCommand(cmd)
+      .then(() => { $('command').value = ''; })
+      .catch(showError);
+  } catch (err) {
+    showError(err);
+  }
 });
 
 $('command').addEventListener('keydown', e => {
