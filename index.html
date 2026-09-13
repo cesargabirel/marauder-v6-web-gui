@@ -504,7 +504,7 @@ const MENU = {
       direct('list -f', 'list -f', 'Lista los Flippers detectados hasta ahora.')
     ],
     Attacks: [
-      direct('blespam all',       'blespam -t all',       'Spam BT contra todos los tipos a la vez. Se detiene con stopscan.', true),
+      direct('blespam all',       'blespam -t all',       '⚠ Puede crashear el ESP32 en v1.16.0 (Guru Meditation + reboot). Si ocurre, el dispositivo se reinicia solo. Se detiene con stopscan.', true),
       direct('blespam sourapple', 'blespam -t sourapple', 'Spam SourApple (popups en dispositivos Apple).', true),
       direct('blespam applejuice','blespam -t applejuice','Spam AppleJuice (popups iOS/macOS).', true),
       direct('blespam google',    'blespam -t google',    'Spam Google (popups Android/ChromeOS).', true),
@@ -623,6 +623,7 @@ const decoder = new TextDecoder('utf-8', { fatal: false });
 /* ============================================================
    Terminal y estadísticas
    ============================================================ */
+const CRASH_PATTERNS = [/Guru Meditation Error/i, /^Rebooting\.\.\./m];
 function addTerminal(text, kind = '') {
   const span = document.createElement('span');
   if (kind) span.className = kind;
@@ -630,6 +631,13 @@ function addTerminal(text, kind = '') {
   const t = $('terminal');
   t.append(span);
   if ($('autoscroll').checked) t.scrollTop = t.scrollHeight;
+  if (CRASH_PATTERNS.some(re => re.test(text))) {
+    const warn = document.createElement('span');
+    warn.className = 'err';
+    warn.textContent = '\n[!] El dispositivo se reinició (posible crash del firmware). Verifica el estado antes de enviar más comandos.\n';
+    t.append(warn);
+    if ($('autoscroll').checked) t.scrollTop = t.scrollHeight;
+  }
 }
 
 function refreshStats() {
