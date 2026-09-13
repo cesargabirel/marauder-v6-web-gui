@@ -490,44 +490,57 @@ const MENU = {
   },
   Bluetooth: {
     Sniffers: [
-      direct('sniffbt',           'sniffbt',            'Escaneo Bluetooth clásico.'),
-      direct('sniffbt airtag',    'sniffbt -t airtag',  'Detecta AirTags cercanos.'),
-      direct('sniffbt flipper',   'sniffbt -t flipper', 'Detecta Flippers Zero cercanos.'),
-      direct('sniffbt flock',     'sniffbt -t flock',   'Detecta cámaras Flock.'),
-      direct('sniffbt meta',      'sniffbt -t meta',    'Detecta dispositivos Meta (Ray-Ban).'),
-      direct('sniffskim',         'sniffskim',          'Detecta skimmers Bluetooth en cajeros.'),
-      configured('findmy',        'findmy -t <índice>', [
-        idx('Índice FindMy/AirTag')
-      ], v => 'findmy -t ' + v[0], 'Rastrea un AirTag/FindMy detectado.'),
-      configured('foxhunt', 'foxhunt -w/-s/-b/-t/-f/-p/-m', [
-        selectField('Modo', [
-          ['-b','Bluetooth'],
-          ['-t','FindMy'],
-          ['-f','Flipper'],
-          ['-p','Pineapple'],
-          ['-m','Multi-SSID'],
-          ['-w','AP WiFi (requiere argumento)'],
-          ['-s','Estación WiFi (requiere 2 argumentos)']
-        ])
-      ], v => 'foxhunt ' + v[0], 'Búsqueda dirigida de un dispositivo concreto.')
+      direct('sniffbt',          'sniffbt',            'Escaneo Bluetooth clásico. Muestra MAC y RSSI.'),
+      direct('sniffbt airtag',   'sniffbt -t airtag',  'Detecta AirTags cercanos.'),
+      direct('sniffbt flipper',  'sniffbt -t flipper', 'Detecta Flippers Zero cercanos.'),
+      direct('sniffbt flock',    'sniffbt -t flock',   'Detecta cámaras Flock. Genera /flock_N.pcap en la SD.'),
+      direct('sniffbt meta',     'sniffbt -t meta',    'Detecta dispositivos Meta (Ray-Ban).'),
+      direct('sniffskim',        'sniffskim',          'Detecta skimmers Bluetooth en cajeros y terminales.'),
+      configured('findmy', 'findmy -t <índice>', [
+        idx('Índice FindMy/AirTag (list -b)')
+      ], v => 'findmy -t ' + v[0],
+        'Rastrea un AirTag/FindMy previamente detectado con sniffbt.'),
+      direct('list -b', 'list -b', 'Lista los dispositivos Bluetooth detectados hasta ahora.'),
+      direct('list -f', 'list -f', 'Lista los Flippers detectados hasta ahora.')
     ],
     Attacks: [
-      configured('blespam', 'blespam -t <tipo>', [
-        selectField('Tipo', [
-          ['all','Todos'],
-          ['sourapple','SourApple'],
-          ['applejuice','AppleJuice'],
-          ['google','Google'],
-          ['samsung','Samsung'],
-          ['windows','Windows (SwiftPair)'],
-          ['flipper','Flipper']
-        ])
-      ], v => 'blespam -t ' + v[0],
-        'Spam de emparejamiento Bluetooth. Se detiene con stopscan.', true),
+      direct('blespam all',       'blespam -t all',       'Spam BT contra todos los tipos a la vez. Se detiene con stopscan.', true),
+      direct('blespam sourapple', 'blespam -t sourapple', 'Spam SourApple (popups en dispositivos Apple).', true),
+      direct('blespam applejuice','blespam -t applejuice','Spam AppleJuice (popups iOS/macOS).', true),
+      direct('blespam google',    'blespam -t google',    'Spam Google (popups Android/ChromeOS).', true),
+      direct('blespam samsung',   'blespam -t samsung',   'Spam Samsung (popups Galaxy).', true),
+      direct('blespam windows',   'blespam -t windows',   'Spam SwiftPair (popups Windows).', true),
+      direct('blespam flipper',   'blespam -t flipper',   'Spam Flipper (popups en Flippers Zero).', true),
       configured('spoofat', 'spoofat -t <índice>', [
-        idx('Índice AirTag')
+        idx('Índice AirTag (list -b)')
       ], v => 'spoofat -t ' + v[0],
-        'Suplanta un AirTag detectado.', true)
+        'Suplanta un AirTag detectado previamente.', true)
+    ],
+    'Fox Hunt': [
+      configured('foxhunt', 'foxhunt <modo> <índice(s)>', [
+        selectField('Modo', [
+          ['-b','Bluetooth (1 índice)'],
+          ['-t','FindMy (1 índice)'],
+          ['-f','Flipper (1 índice)'],
+          ['-p','Pineapple (1 índice)'],
+          ['-m','Multi-SSID (1 índice)'],
+          ['-w','AP WiFi (1 índice AP)'],
+          ['-s','Estación WiFi (AP + estación)']
+        ]),
+        idx('Índice 1'),
+        { ...idx('Índice 2 (solo para -s)'), optional: true }
+      ], v => {
+        const modo = v[0];
+        const i1 = v[1];
+        const i2 = v[2];
+        if (!modo) throw new Error('Elige un modo.');
+        if (!i1) throw new Error('Falta el primer índice.');
+        if (modo === '-s') {
+          if (!i2) throw new Error('El modo -s requiere AP + estación.');
+          return 'foxhunt -s ' + i1 + ' ' + i2;
+        }
+        return 'foxhunt ' + modo + ' ' + i1;
+      }, 'Localiza un dispositivo concreto. Los índices vienen de las listas correspondientes.')
     ]
   },
   GPS: [

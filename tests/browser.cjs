@@ -61,7 +61,8 @@ const path=require('node:path');
    'list -a','list -c','list -i','list -p','list -s','list -t','list -b','list -f','list -x','list -m',
    // Bluetooth
    'sniffbt','sniffbt airtag','sniffbt flipper','sniffbt flock','sniffbt meta','sniffskim','findmy','foxhunt',
-   'blespam','spoofat',
+   'blespam all','blespam sourapple','blespam applejuice','blespam google','blespam samsung','blespam windows','blespam flipper','spoofat',
+'list -b','list -f',
    // GPS
    'gpsdata','nmea','gps','gpstracker','gpspoi','wardrive','wardrivepoi',
    // Device & Settings
